@@ -51,14 +51,19 @@
   <script>
     // Global variables for login state
     let isAuthenticated = false;
-    let cloudStorage = null;
     let userProfile = null;
     
     // Initialize cloud storage manager
     async function initializeCloudStorage() {
       try {
-        cloudStorage = new GoogleDriveStorageManager();
-        await cloudStorage.initialize();
+        // Use the globally initialized cloudStorage from google-drive-storage.js
+        if (typeof GoogleDriveStorageManager === 'undefined') {
+          throw new Error('GoogleDriveStorageManager not loaded');
+        }
+        if (!window.cloudStorage) {
+          window.cloudStorage = new GoogleDriveStorageManager();
+        }
+        await window.cloudStorage.initialize();
         console.log('📁 Google Drive storage ready');
         return true;
       } catch (error) {
@@ -70,10 +75,10 @@
     // Check authentication status and show/hide login overlay
     async function checkAuthStatus() {
       try {
-        if (cloudStorage) {
-          const authenticated = await cloudStorage.authenticate();
+        if (window.cloudStorage) {
+          const authenticated = await window.cloudStorage.authenticate();
           if (authenticated) {
-            userProfile = await cloudStorage.getUserProfile();
+            userProfile = await window.cloudStorage.getUserProfile();
             isAuthenticated = true;
             hideLoginOverlay();
             console.log('✅ User authenticated:', userProfile.name);
@@ -137,7 +142,7 @@
         }
         
         // Check if Google Client ID is configured
-        if (!cloudStorage) {
+        if (!window.cloudStorage) {
           await initializeCloudStorage();
         }
         
@@ -146,9 +151,9 @@
           throw new Error('Google Client ID not configured. Please set up your Google Client ID for cloud sync or use locally.');
         }
         
-        const authenticated = await cloudStorage.authenticate();
+        const authenticated = await window.cloudStorage.authenticate();
         if (authenticated) {
-          userProfile = await cloudStorage.getUserProfile();
+          userProfile = await window.cloudStorage.getUserProfile();
           isAuthenticated = true;
           hideLoginOverlay();
           console.log('✅ Login successful:', userProfile.name);
@@ -182,14 +187,14 @@
     function useLocally() {
       hideLoginError(); // Clear any error messages
       isAuthenticated = false;
-      cloudStorage = null;
+      window.cloudStorage = null;
       hideLoginOverlay();
       console.log('� Using locally without cloud sync');
     }
     
     // Load data from Google Drive if authenticated
     async function loadDataFromCloud() {
-      if (!cloudStorage || !isAuthenticated) return;
+      if (!window.cloudStorage || !isAuthenticated) return;
       
       try {
         // Try to load orders and customers from Google Drive

@@ -3,7 +3,7 @@
 // Replace YOUR_GOOGLE_CLIENT_ID with your real client ID
 
 const GOOGLE_DRIVE_CONFIG = Object.freeze({ // Freeze the config object
-  CLIENT_ID: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com', // Fashion Admin Dashboard Client ID
+  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Google OAuth Client ID
   SCOPES: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
   FOLDER_ID: '', // Optional: set to a folder ID to upload into a specific folder
 });
@@ -66,7 +66,8 @@ class GoogleDriveStorageManager {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
         const authData = JSON.parse(stored);
-        // Only restore if token hasn't expired        if (authData.tokenExpiresAt > Date.now()) {
+        // Only restore if token hasn't expired
+        if (authData.tokenExpiresAt > Date.now()) {
           this.accessToken = authData.accessToken;
           this.tokenExpiresAt = authData.tokenExpiresAt;
           console.info('Restored authentication state from localStorage');
@@ -294,9 +295,9 @@ class GoogleDriveStorageManager {
 }
 
 // Initialize Google Drive storage manager
-const cloudStorage = new GoogleDriveStorageManager();
+window.cloudStorage = new GoogleDriveStorageManager();
 document.addEventListener('DOMContentLoaded', () => {
-  cloudStorage.initialize()
+  window.cloudStorage.initialize()
     .then(() => console.log('Google Drive Storage Manager initialized.'))
     .catch(error => {
       console.warn('Google Drive initialization failed:', error);

@@ -9,7 +9,9 @@
 
 (function() {
   // Create a namespace for extension conflict management
-  window.ExtensionConflictManager = {    // Keep track of recognized extension error patterns    knownErrorPatterns: [
+  window.ExtensionConflictManager = {
+    // Keep track of recognized extension error patterns
+    knownErrorPatterns: [
       { pattern: /ObjectMultiplex.*malformed chunk.*ACK/i, source: 'MetaMask/Crypto-Wallet' },
       { pattern: /StreamMiddleware.*Unknown response id/i, source: 'MetaMask/Crypto-Wallet' },
       { pattern: /-ms-high-contrast.*(deprecated)/i, source: 'Browser-Vendor' },
