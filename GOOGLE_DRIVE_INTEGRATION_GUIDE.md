@@ -14,7 +14,7 @@ The project was **originally designed** to use Google Drive for both authenticat
 **Client Configuration**:
 ```javascript
 const GOOGLE_DRIVE_CONFIG = {
-  CLIENT_ID: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com',
+  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Google Client ID
   SCOPES: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
   FOLDER_ID: '', // Optional: specific folder for uploads
 };
@@ -105,7 +105,7 @@ Attachments ──► File Upload ──► YOUR Google Drive ──► customer
 ### **Security Setup**:
 ```javascript
 // Your personal Google Client ID restricts access
-CLIENT_ID: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com'
+CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID' // Replace with your Google Client ID
 // This can be configured to only accept YOUR email address
 ```
 
