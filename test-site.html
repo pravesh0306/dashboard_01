@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test GitHub Pages</title>
+</head>
+<body>
+    <h1>Site Status Test</h1>
+    <script>
+        // Test if main site loads
+        fetch('https://pravesh0306.github.io/dashboard_01/')
+            .then(response => {
+                console.log('Status:', response.status);
+                document.body.innerHTML += '<p>Site Status: ' + response.status + '</p>';
+                return response.text();
+            })
+            .then(html => {
+                console.log('HTML loaded, length:', html.length);
+                document.body.innerHTML += '<p>HTML loaded successfully, length: ' + html.length + ' characters</p>';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.body.innerHTML += '<p>Error: ' + error.message + '</p>';
+            });
+    </script>
+</body>
+</html>
