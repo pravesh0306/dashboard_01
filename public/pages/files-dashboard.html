@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Dashboard | Varoinmarwah Admin</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+  />
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/polyfills.css">
+</head>
+<body>
+  <div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-[#121416]">File Dashboard</h1>
+        <p class="text-[#6a7681]">Upload, view, and manage all your files</p>
+      </div>
+      <div class="flex gap-3">
+        <button id="uploadFilesBtn" class="bg-[#0066cc] hover:bg-[#0052a3] text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+          Upload Files
+        </button>
+        <button id="refreshFilesBtn" class="bg-[#f0f2f5] hover:bg-[#e1e7ed] text-[#121416] px-4 py-2 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Upload Area (hidden by default) -->
+    <div id="uploadArea" class="mb-8 rounded-lg border border-dashed border-[#dde1e3] bg-[#f8fafc] p-8 text-center hidden">
+      <div class="upload-dropzone" id="dropZone">
+        <input type="file" id="fileInput" style="display: none;" multiple>
+        <div class="mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-[#6a7681]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+        </div>
+        <p class="text-lg mb-2">Drag & drop files here</p>
+        <p class="text-[#6a7681] mb-4">or</p>
+        <label for="fileInput" class="bg-[#0066cc] hover:bg-[#0052a3] text-white px-6 py-3 rounded-lg cursor-pointer">
+          Browse Files
+        </label>
+        <p class="text-xs text-[#6a7681] mt-4">Max file size: 10MB</p>
+      </div>
+      
+      <div id="uploadProgress" class="mt-6 hidden">
+        <div class="flex justify-between mb-2">
+          <span id="uploadFileName" class="text-[#121416] font-medium"></span>
+          <span id="uploadPercent" class="text-[#0066cc]">0%</span>
+        </div>
+        <div class="h-2 bg-[#f0f2f5] rounded-full overflow-hidden">
+          <div id="uploadProgressBar" class="h-full bg-[#0066cc] rounded-full w-0 transition-all duration-300"></div>
+        </div>
+        <button id="cancelUploadBtn" class="mt-4 text-sm text-[#6a7681] hover:text-red-500">Cancel</button>
+      </div>
+    </div>
+    
+    <!-- Files Filter and Search -->
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="relative w-full sm:w-64">
+        <input type="text" id="searchFiles" placeholder="Search files..." class="w-full pl-10 pr-4 py-2 border border-[#dde1e3] rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#6a7681] absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <div class="flex gap-3">
+        <select id="fileTypeFilter" class="border border-[#dde1e3] rounded-lg px-3 py-2">
+          <option value="all">All File Types</option>
+          <option value="image">Images</option>
+          <option value="document">Documents</option>
+          <option value="other">Other</option>
+        </select>
+        <select id="fileSortBy" class="border border-[#dde1e3] rounded-lg px-3 py-2">
+          <option value="date_desc">Newest First</option>
+          <option value="date_asc">Oldest First</option>
+          <option value="name_asc">Name A-Z</option>
+          <option value="name_desc">Name Z-A</option>
+          <option value="size_desc">Size (Largest)</option>
+          <option value="size_asc">Size (Smallest)</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- Files Grid -->
+    <div id="noFilesMessage" class="text-center py-12 hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-[#dde1e3] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="text-xl font-medium text-[#121416] mb-2">No files yet</h3>
+      <p class="text-[#6a7681] mb-6">Upload files to see them here</p>
+      <button id="uploadFirstFileBtn" class="bg-[#0066cc] hover:bg-[#0052a3] text-white px-6 py-3 rounded-lg">
+        Upload Your First File
+      </button>
+    </div>
+    
+    <div id="filesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Files will be added here dynamically -->
+    </div>
+    
+    <!-- File Preview Modal -->
+    <div id="filePreviewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div class="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-[#dde1e3] flex justify-between items-center">
+          <h2 id="previewFileName" class="text-lg font-medium text-[#121416] truncate max-w-[500px]"></h2>
+          <button id="closePreviewBtn" class="text-[#6a7681] hover:text-[#121416]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div id="previewContent" class="flex-1 flex items-center justify-center overflow-auto p-4">
+          <!-- Preview content will be inserted here -->
+        </div>
+        <div class="p-4 border-t border-[#dde1e3] flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <span id="previewFileSize" class="text-sm text-[#6a7681]"></span>
+            <span id="previewFileType" class="text-sm text-[#6a7681]"></span>
+          </div>
+          <div class="flex gap-3">
+            <button id="downloadFileBtn" class="bg-[#f0f2f5] hover:bg-[#e1e7ed] text-[#121416] px-4 py-2 rounded-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM13 9V4a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L13 9.586V4z" clip-rule="evenodd" />
+              </svg>
+              Download
+            </button>
+            <button id="deleteFileBtn" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- File Manager Scripts -->
+  <script src="../js/file-manager.js"></script>
+</body>
+</html>

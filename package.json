@@ -1,0 +1,33 @@
+{
+  "name": "fashion-admin-dashboard-current",
+  "version": "3.0.0",
+  "description": "Fashion Admin Dashboard - Gold Standard Version (No Login Required)",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 8000",
+    "dev": "npx serve -l 8000",
+    "build": "echo \"Static files ready for deployment\"",
+    "build:css": "npx tailwindcss -i ./src/input.css -o ./public/css/tailwind.css --minify",
+    "test": "echo \"Opening test runner\" && start http://localhost:8000/tests/test-runner.html",
+    "deploy": "echo \"Ready for Firebase deployment\"",
+    "backup": "powershell -File backup-project.ps1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11"
+  },
+  "keywords": [
+    "fashion",
+    "admin",
+    "dashboard",
+    "no-auth",
+    "demo",
+    "current-project"
+  ],
+  "author": "Fashion Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Component Test</title>
+  <link rel="stylesheet" href="../public/css/main.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .test-container {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .control-panel {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 5px;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .test-log {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      margin-top: 20px;
+    }
+    .success { color: green; }
+    .error { color: red; }
+    .info { color: blue; }
+  </style>
+</head>
+<body>
+  <h1>Upload Component Test</h1>
+  
+  <div class="control-panel">
+    <h2>Test Controls</h2>
+    <p>Use these controls to test the file upload component with different scenarios.</p>
+    <button id="testUploadSuccess">Test Successful Upload</button>
+    <button id="testUploadError">Test Upload Error</button>
+    <button id="testCancellation">Test Upload Cancel</button>
+    <button id="clearLog">Clear Log</button>
+  </div>
+  
+  <div class="test-container">
+    <h2>File Upload Component</h2>
+    
+    <!-- File Upload Component will be injected here -->
+    <div id="uploadComponent" class="upload-area">
+      <div class="upload-dropzone" id="dropZone">
+        <input type="file" id="fileInput" style="display: none;" multiple>
+        <div class="upload-icon">📁</div>
+        <p>Drag & drop files here or <label for="fileInput" class="upload-button">browse</label></p>
+      </div>
+      
+      <div id="uploadProgress" class="upload-progress" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">0%</div>
+        <button id="cancelUpload" class="cancel-button">Cancel</button>
+      </div>
+      
+      <div id="uploadList" class="upload-list"></div>
+    </div>
+  </div>
+  
+  <div class="test-log" id="testLog">
+    <div class="info">Test log initialized. Run tests to see results here.</div>
+  </div>
+  
+  <!-- Application Scripts -->
+  <script src="../extension-conflict-handler.js"></script>
+  <script src="../google-drive-storage.js"></script>
+  
+  <script>
+    // Test utilities
+    const logElement = document.getElementById('testLog');
+    
+    function log(message, type = 'info') {
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      logEntry.textContent = `[${new Date().toISOString().substr(11, 8)}] ${message}`;
+      logElement.appendChild(logEntry);
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+    
+    // Mock cloud storage for testing
+    class MockCloudStorage {
+      constructor(simulateError = false, simulateCancel = false) {
+        this.simulateError = simulateError;
+        this.simulateCancel = simulateCancel;
+        this.uploadCancelled = false;
+      }
+      
+      async uploadFile(file, onProgress) {
+        log(`Starting upload of "${file.name}" (${file.size} bytes)`, 'info');
+        
+        // Initial delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if (this.simulateError) {
+          log(`Upload error: Connection failed for "${file.name}"`, 'error');
+          throw new Error('Simulated network error');
+        }
+        
+        // Simulate progress updates
+        for (let progress = 0; progress <= 100; progress += 10) {
+          if (this.uploadCancelled || this.simulateCancel) {
+            log(`Upload cancelled for "${file.name}"`, 'info');
+            return null;
+          }
+          
+          if (onProgress) {
+            onProgress(progress);
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+        
+        // Simulate upload completion
+        log(`Upload completed for "${file.name}"`, 'success');
+        
+        return {
+          id: 'file_' + Math.random().toString(36).substring(7),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: 'https://example.com/files/' + file.name
+        };
+      }
+      
+      cancelUpload() {
+        this.uploadCancelled = true;
+        log('Upload cancelled by user', 'info');
+      }
+    }
+    
+    // Upload component controller
+    class UploadController {
+      constructor() {
+        this.cloudStorage = null;
+        this.currentUploads = new Map();
+        this.setupEventListeners();
+      }
+      
+      setupEventListeners() {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const cancelBtn = document.getElementById('cancelUpload');
+        
+        // File selection via button
+        fileInput.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            this.handleFiles(e.target.files);
+          }
+        });
+        
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+          dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('drag-over');
+          
+          if (e.dataTransfer.files.length > 0) {
+            this.handleFiles(e.dataTransfer.files);
+          }
+        });
+        
+        // Cancel upload
+        cancelBtn.addEventListener('click', () => {
+          this.cancelUploads();
+        });
+      }
+      
+      async handleFiles(files) {
+        if (!this.cloudStorage) {
+          log('Cloud storage not initialized', 'error');
+          return;
+        }
+        
+        // Show progress UI
+        const progressElement = document.getElementById('uploadProgress');
+        const progressFill = progressElement.querySelector('.progress-fill');
+        const progressText = progressElement.querySelector('.progress-text');
+        progressElement.style.display = 'flex';
+        
+        // Process files
+        for (const file of files) {
+          try {
+            // Update progress UI to 0%
+            progressFill.style.width = '0%';
+            progressText.textContent = '0%';
+            
+            // Start upload with progress tracking
+            const uploadId = Math.random().toString(36).substring(7);
+            this.currentUploads.set(uploadId, file);
+            
+            const fileInfo = await this.cloudStorage.uploadFile(file, (progress) => {
+              progressFill.style.width = `${progress}%`;
+              progressText.textContent = `${progress}%`;
+            });
+            
+            if (fileInfo) {
+              this.addFileToList(fileInfo);
+            }
+            
+            this.currentUploads.delete(uploadId);
+          } catch (error) {
+            log(`Upload failed: ${error.message}`, 'error');
+          }
+        }
+        
+        // Hide progress UI when done
+        progressElement.style.display = 'none';
+      }
+      
+      cancelUploads() {
+        if (this.cloudStorage) {
+          this.cloudStorage.cancelUpload();
+        }
+      }
+      
+      addFileToList(fileInfo) {
+        const uploadList = document.getElementById('uploadList');
+        
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <div class="file-info">
+            <div class="file-name">${fileInfo.name}</div>
+            <div class="file-size">${this.formatFileSize(fileInfo.size)}</div>
+          </div>
+          <div class="file-actions">
+            <a href="${fileInfo.url}" class="download-btn" target="_blank">Download</a>
+          </div>
+        `;
+        
+        uploadList.appendChild(fileItem);
+      }
+      
+      formatFileSize(bytes) {
+        if (bytes < 1024) {
+          return bytes + ' B';
+        } else if (bytes < 1048576) {
+          return (bytes / 1024).toFixed(1) + ' KB';
+        } else {
+          return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+      }
+      
+      setCloudStorage(storage) {
+        this.cloudStorage = storage;
+      }
+    }
+    
+    // Initialize the test environment
+    document.addEventListener('DOMContentLoaded', () => {
+      const uploadController = new UploadController();
+      window.uploadController = uploadController;
+      
+      // Set up test buttons
+      document.getElementById('testUploadSuccess').addEventListener('click', () => {
+        log('Starting successful upload test', 'info');
+        uploadController.setCloudStorage(new MockCloudStorage());
+        
+        // Create a test file
+        const file = new File(['Test file content'], 'test-document.txt', { type: 'text/plain' });
+        uploadController.handleFiles([file]);
+      });
+      
+      document.getElementById('testUploadError').addEventListener('click', () => {
+        log('Starting upload error test', 'info');
+        uploadController.setCloudStorage(new MockCloudStorage(true));
+        
+        // Create a test file
+        const file = new File(['Test file content'], 'error-document.txt', { type: 'text/plain' });
+        uploadController.handleFiles([file]);
+      });
+      
+      document.getElementById('testCancellation').addEventListener('click', () => {
+        log('Starting upload cancellation test', 'info');
+        uploadController.setCloudStorage(new MockCloudStorage(false, false));
+        
+        // Create a test file
+        const file = new File(['Test file content'], 'cancel-document.txt', { type: 'text/plain' });
+        uploadController.handleFiles([file]);
+        
+        // Cancel after a short delay
+        setTimeout(() => {
+          uploadController.cancelUploads();
+        }, 1000);
+      });
+      
+      document.getElementById('clearLog').addEventListener('click', () => {
+        document.getElementById('testLog').innerHTML = '';
+        log('Log cleared', 'info');
+      });
+    });
+  </script>
+</body>
+</html>

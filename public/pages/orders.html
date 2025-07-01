@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link
+        rel="stylesheet"
+        as="style"
+        onload="this.rel='stylesheet'"
+        href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+      <!-- CSS Files -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/polyfills.css">
+</head>
+<body>
+    <div class="orders-page">
+        <div class="flex flex-col sm:flex-row sm:justify-between gap-3 p-4">            <h1 class="text-[#121416] tracking-light text-2xl sm:text-[32px] font-bold leading-tight">Orders</h1>
+            <div class="print-btn-group flex gap-2" role="toolbar" aria-label="Order actions">
+                <button id="printOrdersBtn" class="w-full sm:w-auto flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#059669] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#047857]" aria-label="Print PDF of orders">
+                    📄 Print PDF
+                </button>
+                <button id="createOrderNavBtnFromOrdersPage" class="w-full sm:w-auto flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#0066cc] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#0052a3]" aria-label="Create new order">
+                    + Create Order
+                </button>
+            </div>
+        </div>        <!-- Filter Section -->
+        <div class="flex flex-wrap gap-3 p-4">
+            <div class="flex max-w-[280px] flex-1">
+                <label for="orderSearch" class="sr-only">Search orders</label>
+                <input 
+                    id="orderSearch"
+                    name="orderSearch"
+                    placeholder="Search orders..." 
+                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#121416] focus:outline-0 focus:ring-0 border border-[#dde1e3] bg-white focus:border-[#dde1e3] h-10 placeholder:text-[#6a7681] p-[15px] text-sm font-normal leading-normal"
+                />
+            </div>
+            <div>
+                <label for="statusFilter" class="sr-only">Filter by status</label>
+                <select 
+                    id="statusFilter"
+                    name="statusFilter"
+                    class="form-select w-full min-w-[160px] flex-1 resize-none overflow-hidden rounded-xl text-[#121416] focus:outline-0 focus:ring-0 border border-[#dde1e3] bg-white focus:border-[#dde1e3] h-10 p-[8px] text-sm font-normal leading-normal">
+                    <option>All Statuses</option>
+                    <option>In Progress</option>
+                    <option>Completed</option>
+                    <option>Cancelled</option>
+                </select>
+            </div>
+            <div>
+                <label for="categoryFilter" class="sr-only">Filter by category</label>
+                <select 
+                    id="categoryFilter"
+                    name="categoryFilter"
+                    class="form-select w-full min-w-[160px] flex-1 resize-none overflow-hidden rounded-xl text-[#121416] focus:outline-0 focus:ring-0 border border-[#dde1e3] bg-white focus:border-[#dde1e3] h-10 p-[8px] text-sm font-normal leading-normal">
+                    <option>All Categories</option>
+                    <option>Bridal Gown</option>
+                    <option>Evening Dress</option>
+                    <option>Cocktail Dress</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortFilter" class="sr-only">Sort options</label>
+                <select 
+                    id="sortFilter"
+                    name="sortFilter"
+                    class="form-select w-full min-w-[160px] flex-1 resize-none overflow-hidden rounded-xl text-[#121416] focus:outline-0 focus:ring-0 border border-[#dde1e3] bg-white focus:border-[#dde1e3] h-10 p-[8px] text-sm font-normal leading-normal">
+                    <option>Sort by Date</option>
+                    <option>Latest First</option>
+                    <option>Oldest First</option>
+                </select>
+            </div>
+        </div>        <!-- Orders Table -->
+        <div class="px-4 py-3">
+            <div class="table-container overflow-x-auto rounded-lg border border-[#dde1e3]">
+                <table class="w-full" aria-label="Orders list" role="grid">
+                    <thead class="bg-[#f8fafc]">
+                        <tr class="border-b border-[#dde1e3]">
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">ORDER ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">CUSTOMER</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">TYPE</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">STATUS</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">DELIVERY DATE</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">ATTACHMENTS</th>
+                            <th scope="col" class="px-4 py-3 text-left text-[#121416] text-sm font-medium">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-[#6a7681]">No orders found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div><!-- Order Preview Panel -->
+        <div id="orderPreviewPanel" class="mt-6 p-4 bg-white rounded-lg border border-[#dde1e3] shadow-sm" style="display:none;" role="region" aria-labelledby="previewOrderTitle">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="previewOrderTitle" class="text-[#121416] text-lg font-bold">Order Details</h3>
+                <button id="closePreviewBtn" class="text-[#6a7681] hover:text-[#121416] p-1 rounded-full hover:bg-[#f0f2f5]" aria-label="Close order preview">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="orderDetailsContent" class="text-[#121416]">
+                <p>Select an order to see details.</p>
+            </div>
+        </div>        <!-- Order Edit Modal -->
+        <div id="orderEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" style="display:none;" role="dialog" aria-labelledby="editOrderTitle" aria-modal="true">
+            <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <h3 id="editOrderTitle" class="text-[#121416] text-lg font-bold mb-4">Edit Order</h3>
+                <form id="editOrderForm" aria-labelledby="editOrderTitle">
+                    <input type="hidden" id="editOrderId" />                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="editCustomerName" class="block text-[#121416] text-sm font-medium mb-2">Customer Name</label>
+                            <input type="text" id="editCustomerName" name="editCustomerName" class="w-full px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent" readonly>
+                        </div>                        <div>
+                            <label for="editCategory" class="block text-[#121416] text-sm font-medium mb-2">Category</label>
+                            <input type="text" id="editCategory" name="editCategory" placeholder="Enter category (e.g., Bridal Gown, Evening Dress)" class="w-full px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">                        <div>
+                            <label for="editType" class="block text-[#121416] text-sm font-medium mb-2">Type</label>
+                            <input type="text" id="editType" name="editType" placeholder="Enter type (e.g., Custom, Standard, Alteration)" class="w-full px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="editStatus" class="block text-[#121416] text-sm font-medium mb-2">Status</label>
+                            <select id="editStatus" name="editStatus" class="w-full px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent">
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editDescription" class="block text-[#121416] text-sm font-medium mb-2">Description</label>
+                        <textarea id="editDescription" name="editDescription" rows="3" class="w-full px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editDeliveryDate" class="block text-[#121416] text-sm font-medium mb-2">Delivery Date</label>
+                        <input type="date" id="editDeliveryDate" name="editDeliveryDate" class="w-full px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editCanvaUrl" class="block text-[#121416] text-sm font-medium mb-2">Canva Design URL <span class="text-xs text-[#6a7681]">(Optional)</span></label>
+                        <div class="flex gap-2">
+                            <input type="url" id="editCanvaUrl" name="editCanvaUrl" class="flex-1 px-3 py-2 border border-[#dde1e3] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent" placeholder="https://www.canva.com/design/XXX/view">
+                            <button type="button" id="editOpenCanvaTemplateBtn" class="px-4 py-2 bg-[#f0f2f5] text-[#121416] rounded-lg border border-[#dde1e3] hover:bg-[#e1e7ed] whitespace-nowrap" aria-label="Use Canva Template">Use Template</button>
+                            <button type="button" id="editConnectToCanvaBtn" class="px-4 py-2 bg-[#00c4cc] text-white rounded-lg hover:bg-[#00a8b0] whitespace-nowrap" aria-label="Open Canva Design Tool">
+                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                Open Canva
+                            </button>
+                        </div>
+                    </div>                    <div class="flex justify-end gap-4">
+                        <button type="button" id="cancelEditBtn" class="px-4 py-2 border border-[#dde1e3] text-[#121416] rounded-lg hover:bg-[#f8fafc]" aria-label="Cancel editing order">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-[#0066cc] text-white rounded-lg hover:bg-[#0052a3]" aria-label="Save order changes">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/pages/orders.js"></script>
+</body>
+</html>

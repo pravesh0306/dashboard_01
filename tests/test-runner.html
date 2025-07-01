@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fashion Admin Dashboard Tests</title>
+  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.4.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #qunit-fixture {
+      position: relative;
+      top: 0;
+      left: 0;
+      height: auto;
+      width: auto;
+    }
+    .test-instructions {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>  <div class="test-instructions">
+    <h2>Fashion Admin Dashboard Test Suite</h2>
+    <p>This page runs automated tests for the Google Drive integration and modular dashboard components.</p>
+    <p>View the test results below or open the browser console for more detailed information.</p>
+  </div>
+  
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  
+  <!-- Load QUnit -->
+  <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
+    <!-- Load Extension Conflict Handler First -->
+  <script src="../extension-conflict-handler.js"></script>
+  
+  <!-- Load Google API -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Load the application code -->
+  <script src="../google-drive-storage.js"></script>
+    <!-- Load Application Code -->
+  <script src="../public/js/utils.js"></script>
+  <script src="../public/js/data.js"></script>
+  <script src="../public/js/app.js"></script>
+  <script src="../public/components/navigation.js"></script>
+  <script src="../public/components/mobile-menu.js"></script>
+  
+  <!-- Load the test helpers -->
+  <script>
+    // Mock Google Identity Services (GIS) for testing
+    window.google = {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config) => ({
+            requestAccessToken: (options) => {
+              if (options && options.callback) {
+                // Simulate success response
+                setTimeout(() => {
+                  options.callback({
+                    access_token: "test_token_123",
+                    expires_in: 3600
+                  });
+                }, 100);
+              }
+            }
+          })
+        },
+        id: {
+          initialize: () => {},
+          renderButton: () => {},
+          disableAutoSelect: () => {}
+        }
+      }
+    };
+    
+    // Mock functions for testing
+    function renderDashboardFiles(files) {
+      const dashboard = document.getElementById('dashboard');
+      if (!dashboard) return;
+      
+      dashboard.innerHTML = '';
+      files.forEach(file => {
+        const fileCard = document.createElement('div');
+        fileCard.className = 'file-card';
+        fileCard.innerHTML = `
+          <h3>${file.name}</h3>
+          <p>Type: ${file.mimeType}</p>
+          <a href="${file.webViewLink}" target="_blank">View</a>
+        `;
+        dashboard.appendChild(fileCard);
+      });
+    }
+    
+    function validateFileUpload(file) {
+      // File validation logic
+      const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+      
+      if (file.size > MAX_SIZE) {
+        return { valid: false, error: 'File exceeds size limit of 20MB' };
+      }
+      
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return { valid: false, error: 'File type not allowed' };
+      }
+      
+      return { valid: true };
+    }
+    
+    // Order submission mock
+    let orderSubmissionCallback;
+    
+    function submitOrder(orderData) {
+      return new Promise((resolve) => {
+        orderSubmissionCallback = resolve;
+      });
+    }
+  </script>
+    <!-- Load test suites -->
+  <script src="test.js"></script>
+  <script src="extension-conflict-tests.js"></script>
+  
+  <script>
+    // Monitor and report test execution errors that might be related to extensions
+    QUnit.on('testEnd', function(details) {
+      if (details.status === 'failed') {
+        details.assertions.forEach(assertion => {
+          if (!assertion.result && window.ExtensionConflictManager.isExtensionError(assertion.message)) {
+            console.warn('⚠️ Test failure may be related to browser extension:', details.name, assertion.message);
+          }
+        });
+      }
+    });
+    
+    // Add UI element to show extension conflict stats
+    QUnit.done(function() {
+      const stats = window.ExtensionConflictManager.getStatistics();
+      if (stats.suppressedErrors > 0) {
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'test-instructions';
+        infoDiv.innerHTML = `
+          <h3>Browser Extension Conflicts</h3>
+          <p>Detected and suppressed ${stats.suppressedErrors} errors from browser extensions during test execution.</p>
+          <p>These errors are not related to your code and can be safely ignored.</p>
+          <ul>
+            ${Object.entries(stats.detailsBySource).map(([source, count]) => 
+              `<li>${source}: ${count} errors suppressed</li>`
+            ).join('')}
+          </ul>
+        `;
+        document.body.appendChild(infoDiv);
+      }
+    });  </script>
+  
+  <!-- Load Test Files -->
+  <script src="test.js"></script>
+  <script src="modular-tests.js"></script>
+</body>
+</html>

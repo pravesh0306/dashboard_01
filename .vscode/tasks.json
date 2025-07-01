@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Start Local Server (port 5500)",
+			"command": "npx serve -l 5500 .",
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}

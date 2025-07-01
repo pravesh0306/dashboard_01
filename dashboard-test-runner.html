@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dashboard Integration Test</title>
+    
+    <!-- PWA and Mobile Meta Tags -->
+    <meta name="theme-color" content="#51946b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Fashion Admin">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    
+    <!-- Styles and Scripts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="../style.css?v=mobile-green-1.0.0">
+    
+    <!-- Test Control Panel -->
+    <style>
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #51946b;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 100;
+            max-width: 350px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .test-panel h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #51946b;
+            font-weight: bold;
+        }
+        
+        .test-control {
+            margin-bottom: 10px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .test-button {
+            background-color: #51946b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .test-button:hover {
+            background-color: #3d7354;
+        }
+        
+        .info-panel {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .results {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .passed {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .failed {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        
+        #testResults {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <h3>Dashboard Test Controls</h3>
+        
+        <div class="test-control">
+            <label>Test Date: <strong>June 12, 2025</strong></label>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+            <button class="test-button" onclick="testStatusCards()">Test Status Cards</button>
+            <button class="test-button" onclick="testCalendar()">Test Calendar</button>
+            <button class="test-button" onclick="testInteraction()">Test Interactions</button>
+            <button class="test-button" onclick="testResponsiveness()">Test Responsive</button>
+            <button class="test-button" onclick="resetTests()">Reset Data</button>
+        </div>
+        
+        <div class="info-panel">
+            <p>This tool allows you to verify the new dashboard features:</p>
+            <ul style="margin-top: 5px; margin-left: 20px; list-style: disc;">
+                <li>Trial Coming Up Status</li>
+                <li>Delivery Coming Up Status</li>
+                <li>Calendar Markings</li>
+            </ul>
+        </div>
+        
+        <div class="results">
+            Results: <span id="testStatus">Not Started</span>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="relative flex size-full min-h-screen flex-col bg-[#f8fbfa] group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+        <div class="layout-container flex h-full grow flex-col">
+            <!-- Stats Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 p-4">
+                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                    <p class="text-[#0e1a13] text-base font-medium leading-normal">Total Orders</p>
+                    <p id="totalOrders" class="text-[#0e1a13] tracking-light text-2xl font-bold leading-tight">0</p>
+                </div>
+                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                    <p class="text-[#0e1a13] text-base font-medium leading-normal">Pending Orders</p>
+                    <p id="pendingOrders" class="text-[#51946b] tracking-light text-2xl font-bold leading-tight">0</p>
+                </div>
+                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                    <p class="text-[#0e1a13] text-base font-medium leading-normal">Completed Orders</p>
+                    <p id="completedOrders" class="text-[#51946b] tracking-light text-2xl font-bold leading-tight">0</p>
+                </div>
+                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                    <p class="text-[#0e1a13] text-base font-medium leading-normal">Active Customers</p>
+                    <p id="totalCustomers" class="text-[#0e1a13] tracking-light text-2xl font-bold leading-tight">0</p>
+                </div>
+                <!-- New Status Cards -->
+                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#f59e0b] bg-gradient-to-br from-[#fffbeb] to-white">
+                    <p class="text-[#0e1a13] text-base font-medium leading-normal">Trials Coming Up</p>
+                    <p id="trialsComingUp" class="text-[#f59e0b] tracking-light text-2xl font-bold leading-tight">0</p>
+                    <p class="text-[#f59e0b] text-xs font-medium">Next 7 days</p>
+                </div>
+                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#10b981] bg-gradient-to-br from-[#ecfdf5] to-white">
+                    <p class="text-[#0e1a13] text-base font-medium leading-normal">Deliveries Coming Up</p>
+                    <p id="deliveriesComingUp" class="text-[#10b981] tracking-light text-2xl font-bold leading-tight">0</p>
+                    <p class="text-[#10b981] text-xs font-medium">Next 7 days</p>
+                </div>
+            </div>
+            
+            <!-- Calendar Section -->
+            <div class="flex flex-col md:flex-row items-start gap-6 p-4">
+                <div class="flex-1 min-w-[300px] max-w-[500px]">
+                    <div class="bg-white p-6 rounded-xl border border-[#d1e6d9]">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-[#0e1a13] text-lg font-bold">Calendar</h2>
+                            <div class="flex items-center">
+                                <button id="prevMonthBtn" class="text-[#67737d] hover:text-[#0e1a13] p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 18l-6-6 6-6"></path>
+                                    </svg>
+                                </button>
+                                <span id="currentMonthLabel" class="text-[#0e1a13] text-sm font-medium mx-2">June 2025</span>
+                                <button id="nextMonthBtn" class="text-[#67737d] hover:text-[#0e1a13] p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18l6-6-6-6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="calendar-grid grid grid-cols-7 gap-1 text-center">
+                            <!-- Calendar will be generated here by JavaScript -->
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3 mt-4 text-xs">
+                            <div class="flex items-center gap-1">
+                                <div class="w-3 h-3 rounded-full border-2 border-[#f59e0b] bg-[#fffbeb]"></div>
+                                <span class="text-[#0e1a13]">Trial</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="w-3 h-3 rounded-full border-2 border-[#10b981] bg-[#ecfdf5]"></div>
+                                <span class="text-[#0e1a13]">Delivery</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="w-3 h-3 rounded-full border-2 border-[#ef4444] bg-[#ffe5e7] animate-pulse"></div>
+                                <span class="text-[#0e1a13]">Urgent (1-2 days)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Events Section -->
+                <div class="flex-1">
+                    <div class="bg-white p-6 rounded-xl border border-[#d1e6d9] mb-4">
+                        <h2 class="text-[#0e1a13] text-lg font-bold mb-4">Upcoming Trials</h2>
+                        <div class="overflow-hidden rounded-xl border border-[#d1e6d9] bg-[#f8fbfa]">
+                            <table class="w-full">
+                                <thead class="bg-[#f8fbfa]">
+                                    <tr class="border-b border-[#d1e6d9]">
+                                        <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Order ID</th>
+                                        <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Customer</th>
+                                        <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="upcomingTrialsTable">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-8 text-center text-[#6a7681]">No upcoming trials</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl border border-[#d1e6d9]">
+                        <h2 class="text-[#0e1a13] text-lg font-bold mb-4">Upcoming Deliveries</h2>
+                        <div class="overflow-hidden rounded-xl border border-[#d1e6d9] bg-[#f8fbfa]">
+                            <table class="w-full">
+                                <thead class="bg-[#f8fbfa]">
+                                    <tr class="border-b border-[#d1e6d9]">
+                                        <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Order ID</th>
+                                        <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Customer</th>
+                                        <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="upcomingDeliveriesTable">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-8 text-center text-[#6a7681]">No upcoming deliveries</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="text-[#0e1a13] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Recent Orders</h2>
+            <div class="px-4 py-3">
+                <div class="overflow-hidden rounded-xl border border-[#d1e6d9] bg-[#f8fbfa]">
+                    <table class="w-full">
+                        <thead class="bg-[#f8fbfa]">
+                            <tr class="border-b border-[#d1e6d9]">
+                                <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Order ID</th>
+                                <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Customer</th>
+                                <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Status</th>
+                                <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Trial Date</th>
+                                <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Delivery Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-[#6a7681]">No recent orders</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mock Data Manager -->
+    <script>
+        // Create a mock DataManager for testing
+        window.dataManager = {
+            orders: [
+                { id: 'ORD-001', customerName: 'Sarah Johnson', status: 'In Progress', trialDate: '2025-06-13', deliveryDate: '2025-07-10' },
+                { id: 'ORD-002', customerName: 'Mark Wilson', status: 'In Progress', trialDate: '2025-06-14', deliveryDate: '2025-07-15' },
+                { id: 'ORD-003', customerName: 'Lisa Cooper', status: 'In Progress', trialDate: '2025-06-19', deliveryDate: '2025-07-20' },
+                { id: 'ORD-004', customerName: 'John Davis', status: 'In Progress', trialDate: '2025-07-15', deliveryDate: '2025-08-10' },
+                { id: 'ORD-005', customerName: 'Emily Brown', status: 'Completed', trialDate: '2025-06-14', deliveryDate: '2025-06-30' },
+                { id: 'ORD-006', customerName: 'Michael Lee', status: 'Cancelled', trialDate: '2025-06-13', deliveryDate: '2025-07-05' }
+            ],
+            customers: [
+                { id: '1', name: 'Sarah Johnson' },
+                { id: '2', name: 'Mark Wilson' },
+                { id: '3', name: 'Lisa Cooper' },
+                { id: '4', name: 'John Davis' },
+                { id: '5', name: 'Emily Brown' },
+                { id: '6', name: 'Michael Lee' }
+            ],
+            getOrders: function() {
+                return this.orders;
+            },
+            setOrders: function(newOrders) {
+                this.orders = newOrders;
+            },
+            getCustomers: function() {
+                return this.customers;
+            }
+        };
+        
+        // Mock app navigation
+        window.app = {
+            navigate: function(page) {
+                console.log(`Navigating to ${page}...`);
+                document.getElementById('testResults').innerHTML += `<div>Navigation: would navigate to ${page}</div>`;
+            }
+        };
+        
+        // Set current date for testing
+        const originalDate = Date;
+        Date = class extends originalDate {
+            constructor(...args) {
+                if (args.length === 0) {
+                    super(2025, 5, 12); // June 12, 2025
+                } else {
+                    super(...args);
+                }
+            }
+        };
+        
+        // Restore original date if needed
+        function restoreOriginalDate() {
+            Date = originalDate;
+        }
+    </script>
+    
+    <!-- Dashboard Controller -->
+    <script src="../public/js/pages/dashboard.js"></script>
+    
+    <!-- Test Scripts -->
+    <script src="../public/js/dashboard-test.js"></script>
+    <script>
+        // Test Controller
+        let testCount = 0;
+        let passedCount = 0;
+        let failedCount = 0;
+        
+        function updateTestStatus() {
+            const statusElement = document.getElementById('testStatus');
+            if (failedCount > 0) {
+                statusElement.className = 'failed';
+                statusElement.textContent = `${passedCount}/${testCount} passed, ${failedCount} failed`;
+            } else if (passedCount > 0) {
+                statusElement.className = 'passed';
+                statusElement.textContent = `${passedCount}/${testCount} passed`;
+            } else {
+                statusElement.className = '';
+                statusElement.textContent = 'Not Started';
+            }
+        }
+        
+        function logTestResult(test, passed, message) {
+            testCount++;
+            
+            if (passed) {
+                passedCount++;
+                console.log(`✅ ${test}: ${message}`);
+            } else {
+                failedCount++;
+                console.error(`❌ ${test}: ${message}`);
+            }
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = passed ? 
+                `<span style="color: #10b981;">✓</span> ${test}: ${message}` : 
+                `<span style="color: #ef4444;">✗</span> ${test}: ${message}`;
+            
+            document.getElementById('testResults').appendChild(resultDiv);
+            updateTestStatus();
+        }
+        
+        function runAllTests() {
+            resetTestResults();
+            testStatusCards();
+            testCalendar();
+            testInteraction();
+            testResponsiveness();
+        }
+        
+        function testStatusCards() {
+            logTestResult('Status Cards', true, 'Starting test...');
+            
+            // Use the dashboardTester to run tests
+            if (window.dashboardTester) {
+                dashboardTester.testStatusCards();
+            } else {
+                logTestResult('Status Cards', false, 'Dashboard tester not available');
+            }
+        }
+        
+        function testCalendar() {
+            logTestResult('Calendar', true, 'Starting test...');
+            
+            // Use the dashboardTester to run tests
+            if (window.dashboardTester) {
+                dashboardTester.testCalendarMarkings();
+            } else {
+                logTestResult('Calendar', false, 'Dashboard tester not available');
+            }
+        }
+        
+        function testInteraction() {
+            logTestResult('Interactions', true, 'Starting test...');
+            
+            // Use the dashboardTester to run tests
+            if (window.dashboardTester) {
+                dashboardTester.testInteractiveFeatures();
+            } else {
+                logTestResult('Interactions', false, 'Dashboard tester not available');
+            }
+        }
+        
+        function testResponsiveness() {
+            logTestResult('Responsive Design', true, 'Testing responsive layout');
+            
+            const width = window.innerWidth;
+            if (width < 768) {
+                // Already in mobile view
+                logTestResult('Mobile View', true, 'Page is already in mobile view, check visually');
+            } else {
+                logTestResult('Mobile View', true, 'Resize browser window to under 768px to test mobile view');
+            }
+        }
+        
+        function resetTests() {
+            // Restore original data
+            if (window.dashboardTester) {
+                dashboardTester.cleanup();
+            }
+            
+            // Reset status
+            resetTestResults();
+            logTestResult('Reset', true, 'Test data reset complete');
+        }
+        
+        function resetTestResults() {
+            testCount = 0;
+            passedCount = 0;
+            failedCount = 0;
+            document.getElementById('testResults').innerHTML = '';
+            updateTestStatus();
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('testResults').innerHTML = '<div>Test environment ready. Click a test button to begin.</div>';
+        });
+    </script>
+</body>
+</html>

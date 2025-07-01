@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Fashion Admin Dashboard</title>
+  
+  <!-- PWA and Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#51946b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Fashion Admin">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <!-- Apple touch icon removed for local development -->
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+  />
+  
+  <!-- Styles and Scripts -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Excel Export Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Extension Conflict Handler to prevent browser extension errors from affecting the app -->
+  <script src="extension-conflict-handler.js"></script>
+  <script>
+    // Local dashboard - no authentication needed
+    console.log('🚀 Loading Local Fashion Dashboard');
+    
+    // Performance monitoring
+    const perfStart = performance.now();
+    
+    // Log performance when page loads
+    window.addEventListener('load', () => {
+      const loadTime = performance.now() - perfStart;
+      console.log(`⚡ Page loaded in ${loadTime.toFixed(2)}ms`);
+    });
+  </script>
+  </script>
+  <!-- Local Dashboard Configuration -->
+  <script>
+    // Simplified local storage manager for local development
+    const cloudStorage = null; // Disabled for local use
+    console.log('📁 Local dashboard - cloud storage disabled');
+    
+    // Initialize app without authentication
+    console.log('🚀 Fashion Dashboard ready for local use');
+  </script>
+  </script>
+  <!-- Fix: Top Right Search/Filter Box -->
+  <style>
+    .dashboard-search-box {
+      background: #fff;
+      color: #22223b;
+      border: 1.5px solid #c3cfe2;
+      border-radius: 0.7rem;
+      padding: 0.7rem 1.1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.16s;
+      margin-top: 0.2rem;
+      box-shadow: 0 2px 8px 0 rgba(30, 34, 90, 0.04);
+    }
+    .dashboard-search-box:focus {
+      border: 1.5px solid #6a82fb;
+      background: #fff;
+    }
+    .order-details-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      background: #fff;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 24px 0 rgba(30, 34, 90, 0.08);
+      padding: 2rem 1.5rem;
+      margin-top: 1rem;
+      max-width: 480px;
+    }
+    .order-details-form label {
+      font-size: 0.98rem;
+      font-weight: 500;
+      color: #6a82fb;
+      margin-bottom: 0.3rem;
+    }
+    .order-details-form input,
+    .order-details-form select {
+      border: 1.5px solid #c3cfe2;
+      border-radius: 0.7rem;
+      padding: 0.7rem 1.1rem;
+      font-size: 1rem;
+      background: #f5f7fa;
+      color: #22223b;
+      outline: none;
+      transition: border 0.16s;
+    }
+    .order-details-form input:disabled,
+    .order-details-form select:disabled {
+      background: #f5f7fa;
+      color: #888;
+      opacity: 1;
+    }
+    .order-details-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.2rem;
+      justify-content: flex-end;
+    }
+    .order-btn {
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.6rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+      box-shadow: 0 2px 8px 0 rgba(30, 34, 90, 0.06);
+    }
+    .order-btn.edit { background: linear-gradient(90deg, #6a82fb 0%, #fc5c7d 100%); color: #fff; }
+    .order-btn.delete { background: #f87171; color: #fff; }
+    .order-btn.save { background: #10b981; color: #fff; }
+    .order-btn.cancel { background: #f5f7fa; color: #6a82fb; border: 1px solid #c3cfe2; }
+    .order-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    /* Fix button visibility - ensure all buttons are visible */
+    button {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    
+    /* Specific button visibility fixes */
+    #printDashboardBtn,
+    #printOrdersBtn, 
+    #exportOrdersBtn,
+    #createOrderNavBtnFromOrdersPage,
+    #printCreateOrderBtn {
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: flex !important;
+      color: white !important;
+      border: 1px solid transparent !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Print button specific colors */
+    #printDashboardBtn,
+    #printOrdersBtn,
+    #printCreateOrderBtn {
+      background-color: #6f42c1 !important;
+      border-color: #6f42c1 !important;
+    }
+    
+    #exportOrdersBtn {
+      background-color: #28a745 !important;
+      border-color: #28a745 !important;
+    }
+    
+    #createOrderNavBtnFromOrdersPage {
+      background-color: #51946b !important;
+      border-color: #51946b !important;
+    }
+    
+    /* Action buttons in table rows - using attribute selector */
+    button[onclick*="printOrder"] {
+      background-color: #6f42c1 !important;
+      color: white !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      border: 1px solid #6f42c1 !important;
+    }
+    
+    /* Hover effects for buttons */
+    .print-button:hover {
+      background-color: #5a2d91 !important;
+      border-color: #5a2d91 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    .export-button:hover {
+      background-color: #218838 !important;
+      border-color: #218838 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    .create-button:hover {
+      background-color: #3d7354 !important;
+      border-color: #3d7354 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    button[onclick*="printOrder"]:hover {
+      background-color: #5a2d91 !important;
+      border-color: #5a2d91 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+  </style>
+</head>
+<body>  <!-- Login Page - DISABLED FOR LOCAL USE
+  <div id="loginPage" class="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-indigo-50 via-white to-cyan-50 group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJkb3RzIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8Y2lyY2xlIGN4PSIxIiBjeT0iMSIgcj0iMSIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+CiAgICA8L3BhdHRlcm4+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0idXJsKCNkb3RzKSIvPgo8L3N2Zz4=')] opacity-30"></div>
+    
+    <div class="layout-container flex h-full grow flex-col relative z-10">
+      <!-- Header Logo -->
+      <div class="flex justify-center pt-8">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="text-xl font-bold text-gray-900">Fashion Admin</span>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex flex-1 justify-center items-center px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md space-y-8">
+          <!-- Welcome Card -->
+          <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/50 p-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+              <p class="text-gray-600">Sign in to your Fashion Admin Dashboard</p>
+            </div>
+
+            <!-- Features List -->
+            <div class="space-y-4 mb-8">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700 text-sm">Secure Google Drive Integration</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700 text-sm">File Upload & Management</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  </svg>
+                </div>
+                <span class="text-gray-700 text-sm">Order & Customer Management</span>
+              </div>
+            </div>
+
+            <!-- Sign In Button -->
+            <button
+              id="loginBtn"
+              class="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="w-5 h-5 mr-3">
+              <span>Sign in with Google Drive</span>
+            </button>
+
+            <!-- Status Message -->
+            <div id="loginStatus" class="text-center mt-4 text-sm min-h-[20px]"></div>
+          </div>
+
+          <!-- Footer -->
+          <div class="text-center">
+            <p class="text-xs text-gray-500">
+              Secure authentication powered by Google Identity Services
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->  <!-- Main App Layout -->
+  <div id="appContainer" class="relative flex size-full min-h-screen flex-col bg-[#f8fbfa] group/design-root overflow-x-hidden" style="display:flex; font-family: Inter, 'Noto Sans', sans-serif;">
+    <div class="flex h-full grow">
+      <!-- Sidebar (Reference Design Style) -->
+      <div id="sidebar" class="sidebar">
+        <div class="flex flex-col gap-4">
+          <h1 class="text-[#0e1a13] text-base font-medium leading-normal">Varoinmarwah</h1>
+          <div class="flex flex-col gap-2">
+            <a class="sidebar-item nav-item" data-page="dashboard">
+              <div class="text-[#0e1a13]" data-icon="House" data-size="24px" data-weight="fill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                  <path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.53,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
+                </svg>
+              </div>
+              <p class="text-[#0e1a13] text-sm font-medium leading-normal">Dashboard</p>
+            </a>
+            <a class="sidebar-item nav-item" data-page="orders">
+              <div class="text-[#0e1a13]" data-icon="Package" data-size="24px" data-weight="regular">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                  <path d="M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.34,44-29.77,16.3-80.35-44ZM128,120,47.66,76l33.9-18.56,80.34,44ZM40,90l80,43.78v85.79L40,175.82Zm176,85.78h0l-80,43.79V133.82l32-17.51V152a8,8,0,0,0,16,0V107.55L216,90v85.77Z"></path>
+                </svg>
+              </div>
+              <p class="text-[#0e1a13] text-sm font-medium leading-normal">Orders</p>
+            </a>
+            <a class="sidebar-item nav-item" data-page="customers">
+              <div class="text-[#0e1a13]" data-icon="Users" data-size="24px" data-weight="regular">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                  <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"></path>
+                </svg>
+              </div>
+              <p class="text-[#0e1a13] text-sm font-medium leading-normal">Customers</p>
+            </a>
+            <a class="sidebar-item nav-item" data-page="createOrder">
+              <div class="text-[#0e1a13]" data-icon="Plus" data-size="24px" data-weight="regular">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                  <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path>
+                </svg>
+              </div>
+              <p class="text-[#0e1a13] text-sm font-medium leading-normal">Create Order</p>
+            </a>
+            <a class="sidebar-item nav-item" data-page="settings">
+              <div class="text-[#0e1a13]" data-icon="Gear" data-size="24px" data-weight="regular">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                  <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"></path>
+                </svg>
+              </div>
+              <p class="text-[#0e1a13] text-sm font-medium leading-normal">Settings</p>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Toggle -->
+      <button id="mobileNavToggle" class="mobile-nav-toggle" title="Toggle navigation menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
+          <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path>
+        </svg>
+      </button>
+
+      <!-- Mobile Navigation Menu -->
+      <div id="mobileNavMenu" class="mobile-nav-menu">
+        <button id="closeMobileNav" style="position: absolute; top: 1rem; right: 1rem; color: white; background: none; border: none; font-size: 2rem;">&times;</button>
+        <a class="mobile-nav-item nav-item" data-page="dashboard">Dashboard</a>
+        <a class="mobile-nav-item nav-item" data-page="orders">Orders</a>
+        <a class="mobile-nav-item nav-item" data-page="customers">Customers</a>
+        <a class="mobile-nav-item nav-item" data-page="createOrder">Create Order</a>
+        <a class="mobile-nav-item nav-item" data-page="settings">Settings</a>
+      </div>
+
+      <!-- Main Content Container -->
+      <div class="flex flex-col flex-1 min-h-0">
+        <!-- Header -->
+        <header class="header flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#d1e6d9] px-4 py-3 bg-[#f8fbfa]">
+          <div class="flex items-center gap-4">
+            <h2 class="text-[#0e1a13] text-lg font-bold leading-tight tracking-[-0.015em]">Fashion Admin Dashboard</h2>
+          </div>
+          <div class="flex items-center gap-4">
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              style='background-image: url("https://ui-avatars.com/api/?name=Admin&background=e8f2ec&color=0e1a13");'
+            ></div>
+          </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="main-content flex flex-1 justify-center py-5 px-4">
+          <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">          <!-- Dashboard Page -->
+          <section id="dashboardPage" class="page-section">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <p class="text-[#0e1a13] tracking-light text-[32px] font-bold leading-tight min-w-72">Dashboard</p>
+              <button id="printDashboardBtn" class="print-button" style="background-color: #6f42c1 !important; color: white !important; border: 1px solid #6f42c1 !important; min-width: 100px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
+                <span style="margin-right: 4px;">🖨️</span> Print PDF
+              </button>
+            </div>            <div class="flex flex-wrap gap-4 p-4">
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                <p class="text-[#0e1a13] text-base font-medium leading-normal">Total Orders</p>
+                <p id="totalOrders" class="text-[#0e1a13] tracking-light text-2xl font-bold leading-tight">0</p>
+              </div>
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                <p class="text-[#0e1a13] text-base font-medium leading-normal">Pending Orders</p>
+                <p id="pendingOrders" class="text-[#ca8a04] tracking-light text-2xl font-bold leading-tight">0</p>
+              </div>
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                <p class="text-[#0e1a13] text-base font-medium leading-normal">Completed Orders</p>
+                <p id="completedOrders" class="text-[#51946b] tracking-light text-2xl font-bold leading-tight">0</p>
+              </div>
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
+                <p class="text-[#0e1a13] text-base font-medium leading-normal">Active Customers</p>
+                <p id="totalCustomers" class="text-[#0e1a13] tracking-light text-2xl font-bold leading-tight">0</p>
+              </div>
+              <!-- New Status Cards -->
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#f59e0b] bg-gradient-to-br from-[#fffbeb] to-white">
+                <p class="text-[#0e1a13] text-base font-medium leading-normal">Trials Coming Up</p>
+                <p id="trialsComingUp" class="text-[#f59e0b] tracking-light text-2xl font-bold leading-tight">0</p>
+                <p class="text-[#f59e0b] text-xs font-medium">Next 7 days</p>
+              </div>
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#10b981] bg-gradient-to-br from-[#ecfdf5] to-white">
+                <p class="text-[#0e1a13] text-base font-medium leading-normal">Deliveries Coming Up</p>
+                <p id="deliveriesComingUp" class="text-[#10b981] tracking-light text-2xl font-bold leading-tight">0</p>
+                <p class="text-[#10b981] text-xs font-medium">Next 7 days</p>
+              </div>
+            </div>
+            <h2 class="text-[#0e1a13] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Recent Orders</h2>
+            <div class="px-4 py-3">
+              <div class="overflow-hidden rounded-xl border border-[#d1e6d9] bg-[#f8fbfa]">
+                <table class="w-full">
+                  <thead class="bg-[#f8fbfa]">
+                    <tr class="border-b border-[#d1e6d9]">
+                      <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Order ID</th>
+                      <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Customer</th>
+                      <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Status</th>
+                      <th class="px-4 py-3 text-left text-[#0e1a13] text-sm font-medium">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentOrdersTable">
+                    <tr>
+                      <td colspan="4" class="px-4 py-8 text-center text-[#51946b]">No recent orders</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>          <!-- Orders Page -->
+          <section id="ordersPage" class="page-section" style="display:none;">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-white border-b border-[#d1e6d9]">
+              <div class="flex-1">
+                <p class="text-[#111518] tracking-light text-[32px] font-bold leading-tight">Orders</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <!-- Search/Filter Input -->
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="orderSearchInput" 
+                    placeholder="Search orders..." 
+                    class="w-64 px-3 py-2 border border-[#d1e6d9] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#51946b] focus:border-transparent bg-white"
+                  />
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-[#6a7681]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <!-- Print PDF Button -->
+                <button id="printOrdersBtn" class="print-button" style="background-color: #6f42c1 !important; color: white !important; border: 1px solid #6f42c1 !important; min-width: 100px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; margin-right: 8px !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
+                  <span style="margin-right: 4px;">🖨️</span> Print PDF
+                </button>
+                <!-- Export Button -->
+                <button id="exportOrdersBtn" class="export-button" style="background-color: #28a745 !important; color: white !important; border: 1px solid #28a745 !important; min-width: 100px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; margin-right: 8px !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
+                  <span style="margin-right: 4px;">📊</span> Export Excel
+                </button>
+                <!-- Create Order Button -->
+                <button id="createOrderNavBtnFromOrdersPage" class="create-button" style="background-color: #51946b !important; color: white !important; border: 1px solid #51946b !important; min-width: 120px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
+                  <span style="margin-right: 4px;">+</span> Create Order
+                </button>
+              </div>
+            </div>
+            <div class="px-4 py-3">
+              <div class="overflow-hidden rounded-lg border border-[#d1e6d9]">
+                <table class="w-full">
+                  <thead class="bg-[#f8fafc]">
+                    <tr class="border-b border-[#d1e6d9]">                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">ORDER ID</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">CUSTOMER</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">TYPE</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">STATUS</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">TECHPACK</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">DELIVERY DATE</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">ATTACHMENTS</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTableBody">
+                    <tr>
+                      <td colspan="8" class="px-4 py-8 text-center text-[#6a7681]">No orders found</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- Order Preview Panel -->
+            <div id="orderPreviewPanel" class="order-details-form" style="display:none;">
+  <form id="orderDetailsForm">
+    <label>Order ID</label>
+    <input type="text" id="orderIdField" disabled value="" />
+    <label>Customer Name</label>
+    <input type="text" id="customerNameField" disabled value="" />
+    <label>Status</label>
+    <select id="orderStatusField" disabled>
+      <option value="Pending">Pending</option>
+      <option value="Completed">Completed</option>
+      <option value="Cancelled">Cancelled</option>
+    </select>
+    <label>Date</label>
+    <input type="date" id="orderDateField" disabled value="" />
+    <div class="order-details-actions">
+      <button type="button" class="order-btn edit" id="editOrderBtn">Edit</button>
+      <button type="button" class="order-btn delete" id="deleteOrderBtn">Delete</button>
+      <button type="submit" class="order-btn save" id="saveOrderBtn" style="display:none;">Save</button>
+      <button type="button" class="order-btn cancel" id="cancelEditBtn" style="display:none;">Cancel</button>
+    </div>
+  </form>
+</div>
+          </section>          <!-- Create Order Page -->
+          <section id="createOrderPage" class="page-section" style="display:none;">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <p class="text-[#111518] tracking-light text-[32px] font-bold leading-tight min-w-72">Create New Order</p>
+              <button id="printCreateOrderBtn" class="print-button" style="background-color: #6f42c1 !important; color: white !important; border: 1px solid #6f42c1 !important; min-width: 100px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
+                <span style="margin-right: 4px;">🖨️</span> Print Form
+              </button>
+            </div>            <form id="createOrderForm" class="p-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Customer Name</label>
+                  <input type="text" name="customerName" required class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter full customer name">
+                </div>
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Phone</label>
+                  <input type="tel" name="phone" required class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter phone number">
+                </div>
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Dress Category</label>
+                  <input type="text" name="category" required class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter dress category (e.g., Bridal Gown, Evening Dress)">
+                </div>
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Dress Type</label>
+                  <input type="text" name="type" required class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter dress type (e.g., Custom, Standard, Alteration)">
+                </div>
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Fabric Name</label>
+                  <input type="text" name="fabricName" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter fabric name/type">
+                </div>
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Style Reference</label>
+                  <input type="text" name="styleReference" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter style reference (e.g., Modern, Classic, Bohemian)">
+                </div>
+              </div>
+              
+              <!-- Fabric Attachment Section -->
+              <div class="mb-6">
+                <label class="block text-[#111518] text-sm font-medium mb-2">Fabric Attachment</label>
+                <div class="border-2 border-dashed border-[#d1e6d9] rounded-lg p-6 text-center hover:border-[#51946b] transition-colors">
+                  <div class="mb-4">
+                    <svg class="mx-auto h-12 w-12 text-[#6a7681]" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p class="text-[#111518] font-medium">Upload Fabric Images or Documents</p>
+                    <p class="text-[#6a7681] text-sm">Drag and drop files here or click to browse</p>
+                  </div>
+                  <input type="file" name="fabricAttachment" id="fabricAttachment" accept="image/*,.pdf" class="hidden">
+                  <button type="button" onclick="document.getElementById('fabricAttachment').click()" class="px-4 py-2 bg-[#51946b] text-white rounded-lg hover:bg-[#3d7354] transition-colors">
+                    📎 Upload Fabric
+                  </button>
+                  <div id="fabricPreview" class="mt-3 text-sm text-[#6a7681] hidden"></div>
+                </div>
+              </div>
+              
+              <!-- Style Attachment Section -->
+              <div class="mb-6">
+                <label class="block text-[#111518] text-sm font-medium mb-2">Style Attachment</label>
+                <div class="border-2 border-dashed border-[#d1e6d9] rounded-lg p-6 text-center hover:border-[#51946b] transition-colors">
+                  <div class="mb-4">
+                    <svg class="mx-auto h-12 w-12 text-[#6a7681]" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p class="text-[#111518] font-medium">Upload Style Reference Images</p>
+                    <p class="text-[#6a7681] text-sm">Drag and drop style references here or click to browse</p>
+                  </div>
+                  <input type="file" name="styleAttachment" id="styleAttachment" accept="image/*,.pdf" class="hidden">
+                  <button type="button" onclick="document.getElementById('styleAttachment').click()" class="px-4 py-2 bg-[#51946b] text-white rounded-lg hover:bg-[#3d7354] transition-colors">
+                    📎 Upload Style
+                  </button>
+                  <div id="stylePreview" class="mt-3 text-sm text-[#6a7681] hidden"></div>
+                </div>
+              </div>              <div class="mb-6">
+                <label class="block text-[#111518] text-sm font-medium mb-2">Description</label>
+                <textarea name="description" rows="4" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="Enter order description"></textarea>
+              </div>
+              
+              <!-- Trial Date and Delivery Date Side by Side -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Trial Date</label>
+                  <input type="date" name="trialDate" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent">
+                </div>
+                <div>
+                  <label class="block text-[#111518] text-sm font-medium mb-2">Delivery Date</label>
+                  <input type="date" name="deliveryDate" required class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent">
+                </div>
+              </div>
+              <div class="mb-6">
+                <h3 class="text-[#111518] text-lg font-bold mb-4">Measurements</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-[#111518] text-sm font-medium mb-2">Chest (inches)</label>
+                    <input type="number" name="chest" step="0.5" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="0.0">
+                  </div>
+                  <div>
+                    <label class="block text-[#111518] text-sm font-medium mb-2">Waist (inches)</label>
+                    <input type="number" name="waist" step="0.5" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="0.0">
+                  </div>
+                  <div>
+                    <label class="block text-[#111518] text-sm font-medium mb-2">Hip (inches)</label>
+                    <input type="number" name="hip" step="0.5" class="w-full px-3 py-2 border border-[#d1e6d9] rounded-lg focus:ring-2 focus:ring-[#51946b] focus:border-transparent" placeholder="0.0">
+                  </div>
+                </div>
+              </div>              <!-- Enhanced Additional Attachments Section -->
+              <div class="mb-6">
+                <label class="block text-[#111518] text-sm font-medium mb-2">Additional Attachments</label>
+                <div class="border-2 border-dashed border-[#d1e6d9] rounded-lg p-6 text-center hover:border-[#51946b] transition-colors" id="additionalAttachmentsZone">
+                  <div class="mb-4">
+                    <svg class="mx-auto h-12 w-12 text-[#6a7681]" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <p class="text-[#111518] font-medium">Upload Additional Files</p>
+                    <p class="text-[#6a7681] text-sm">Drag and drop files here or click to browse</p>
+                    <p class="text-xs text-[#6a7681] mt-2">Supports: Images, PDFs, Documents (Max 10MB each)</p>
+                  </div>
+                  <input type="file" name="attachments" id="orderAttachments" multiple accept="image/*,.pdf,.doc,.docx,.txt,.xlsx,.ppt,.pptx" class="hidden">
+                  <div class="flex flex-col sm:flex-row gap-2 justify-center">
+                    <button type="button" id="selectFilesBtn" class="px-4 py-2 bg-[#51946b] text-white rounded-lg hover:bg-[#3d7354] transition-colors">
+                      📎 Select Files
+                    </button>
+                    <button type="button" id="addMoreFilesBtn" class="px-4 py-2 bg-[#28a745] text-white rounded-lg hover:bg-[#218838] transition-colors hidden">
+                      ➕ Add More
+                    </button>
+                    <button type="button" id="clearAllFilesBtn" class="px-4 py-2 bg-[#dc3545] text-white rounded-lg hover:bg-[#c82333] transition-colors hidden">
+                      🗑️ Clear All
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Selected Files Display -->
+                <div id="selectedFilesDisplay" class="mt-4 hidden">
+                  <div class="bg-[#f8fafc] border border-[#d1e6d9] rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <h4 class="text-[#111518] text-sm font-medium">Selected Files (<span id="fileCount">0</span>)</h4>
+                      <span class="text-xs text-[#6a7681]">Click files to preview</span>
+                    </div>
+                    <div id="filesList" class="space-y-2 max-h-48 overflow-y-auto">
+                      <!-- Files will be displayed here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-[#51946b] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#3d7354]">
+                Create Order
+              </button>
+            </form>
+          </section>          <!-- Customers Page -->
+          <section id="customersPage" class="page-section" style="display:none;">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <p class="text-[#111518] tracking-light text-[32px] font-bold leading-tight min-w-72">Customers</p>
+            </div>
+            <div class="px-4 py-3">
+              <div class="overflow-hidden rounded-lg border border-[#d1e6d9]">
+                <table class="w-full">
+                  <thead class="bg-[#f8fafc]">                    <tr class="border-b border-[#d1e6d9]">
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">NAME</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">PHONE</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">ORDERS</th>
+                      <th class="px-4 py-3 text-left text-[#111518] text-sm font-medium">ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody id="customersTableBody">
+                    <tr>
+                      <td colspan="4" class="px-4 py-8 text-center text-[#6a7681]">No customers found</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Settings Page -->
+          <section id="settingsPage" class="page-section" style="display:none;">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <p class="text-[#111518] tracking-light text-[32px] font-bold leading-tight min-w-72">Settings</p>
+            </div>
+            <div class="p-4">
+              <p class="text-[#6a7681] text-base">Settings will be available soon.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // --- Data Models with Persistence ---
+function saveData() {
+  localStorage.setItem('orders', JSON.stringify(orders));
+  localStorage.setItem('customers', JSON.stringify(customers));
+}
+function loadData() {
+  const o = localStorage.getItem('orders');
+  const c = localStorage.getItem('customers');  orders = o ? JSON.parse(o) : [
+    {
+      id: 1,
+      customer: 'Sarah Johnson',
+      phone: '+1-555-0123',
+      category: 'Bridal Gown',
+      type: 'Custom',
+      fabricName: 'Silk Chiffon',
+      styleReference: 'Modern Minimalist',
+      description: 'Elegant off-shoulder bridal gown with lace details and cathedral train',
+      status: 'In Progress',
+      trialDate: '2025-07-15',
+      deliveryDate: '2025-08-15',
+      measurements: { chest: 34, waist: 26, hip: 36 },
+      fabricAttachment: { id: 'fab1', name: 'silk_fabric_sample.jpg', url: '#', size: 145760, type: 'image/jpeg' },
+      styleAttachment: { id: 'style1', name: 'bridal_inspiration.jpg', url: '#', size: 225760, type: 'image/jpeg' },
+      techpackAttachment: { id: 'tech1', name: 'bridal_techpack.pdf', url: '#', size: 512000, type: 'application/pdf' },
+      attachments: [
+        { id: 'att1', name: 'design_sketch.jpg', url: '#', size: 245760, type: 'image/jpeg' },
+        { id: 'att2', name: 'measurements_chart.pdf', url: '#', size: 189440, type: 'application/pdf' }
+      ]
+    },
+    {
+      id: 2,
+      customer: 'Emily Davis',
+      phone: '+1-555-0124',
+      category: 'Evening Dress',
+      type: 'Standard',
+      fabricName: 'Velvet',
+      styleReference: 'Classic Elegance',
+      description: 'Black evening dress for gala event with deep V-neck',
+      status: 'Completed',
+      trialDate: '2025-06-10',
+      deliveryDate: '2025-06-30',
+      measurements: { chest: 32, waist: 24, hip: 34 },
+      fabricAttachment: { id: 'fab2', name: 'black_velvet.jpg', url: '#', size: 167890, type: 'image/jpeg' },
+      attachments: [
+        { id: 'att3', name: 'final_photos.jpg', url: '#', size: 334560, type: 'image/jpeg' }
+      ]
+    },
+    {
+      id: 3,
+      customer: 'Maria Rodriguez',
+      phone: '+1-555-0125',
+      category: 'Cocktail Dress',
+      type: 'Custom',
+      fabricName: 'Sequined Georgette',
+      styleReference: 'Bohemian Chic',
+      description: 'Red cocktail dress with hand-sewn sequin details and asymmetric hem',
+      status: 'In Progress',
+      trialDate: '2025-07-16',
+      deliveryDate: '2025-08-01',
+      measurements: { chest: 36, waist: 28, hip: 38 },
+      styleAttachment: { id: 'style3', name: 'cocktail_reference.jpg', url: '#', size: 198320, type: 'image/jpeg' },
+      attachments: [
+        { id: 'att4', name: 'sequin_pattern.png', url: '#', size: 184320, type: 'image/png' },
+        { id: 'att5', name: 'color_palette.jpg', url: '#', size: 156780, type: 'image/jpeg' }
+      ]
+    },
+    {
+      id: 4,
+      customer: 'Jessica Chen',
+      phone: '+1-555-0126',
+      category: 'Wedding Party',
+      type: 'Custom',
+      fabricName: 'Tulle',
+      styleReference: 'Romantic',
+      description: 'Bridesmaid dress in dusty rose with flowing sleeves',
+      status: 'Pending',
+      trialDate: '2025-07-20',
+      deliveryDate: '2025-08-10',
+      measurements: { chest: 33, waist: 25, hip: 35 },
+      fabricAttachment: { id: 'fab4', name: 'dusty_rose_tulle.jpg', url: '#', size: 178950, type: 'image/jpeg' },
+      techpackAttachment: { id: 'tech4', name: 'bridesmaid_specs.pdf', url: '#', size: 423000, type: 'application/pdf' },
+      attachments: [
+        { id: 'att6', name: 'sleeve_detail.jpg', url: '#', size: 201340, type: 'image/jpeg' }
+      ]
+    }
+  ];
+  customers = c ? JSON.parse(c) : [
+    {
+      name: 'Sarah Johnson',
+      email: 'sarah.johnson@email.com',
+      phone: '(555) 123-4567',
+      orders: 1
+    },
+    {
+      name: 'Emily Davis',
+      email: 'emily.davis@email.com',
+      phone: '(555) 234-5678',
+      orders: 1
+    },
+    {
+      name: 'Maria Rodriguez',
+      email: 'maria.rodriguez@email.com',
+      phone: '(555) 345-6789',
+      orders: 1
+    }
+  ];
+}
+
+// --- Dashboard Rendering ---
+function renderDashboard() {
+  const today = new Date();
+  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  
+  // Calculate upcoming trials and deliveries (within next 7 days)
+  const upcomingTrials = orders.filter(order => {
+    if (!order.trialDate) return false;
+    const trialDate = new Date(order.trialDate);
+    return trialDate >= today && trialDate <= nextWeek && order.status !== 'Completed' && order.status !== 'Cancelled';
+  }).length;
+  
+  const upcomingDeliveries = orders.filter(order => {
+    if (!order.deliveryDate) return false;
+    const deliveryDate = new Date(order.deliveryDate);
+    return deliveryDate >= today && deliveryDate <= nextWeek && order.status !== 'Completed' && order.status !== 'Cancelled';
+  }).length;
+  
+  document.getElementById('totalOrders').textContent = orders.length;
+  document.getElementById('pendingOrders').textContent = orders.filter(o => o.status === 'In Progress').length;
+  document.getElementById('completedOrders').textContent = orders.filter(o => o.status === 'Completed').length;
+  document.getElementById('totalCustomers').textContent = customers.length;
+  
+  // Update new status elements
+  if (document.getElementById('trialsComingUp')) {
+    document.getElementById('trialsComingUp').textContent = upcomingTrials;
+  }
+  if (document.getElementById('deliveriesComingUp')) {
+    document.getElementById('deliveriesComingUp').textContent = upcomingDeliveries;
+  }
+  document.getElementById('totalCustomers').textContent = customers.length;
+}
+
+// --- Orders Table Rendering ---
+function renderOrders() {
+  const tbody = document.getElementById('ordersTableBody');
+  const recentOrdersTable = document.getElementById('recentOrdersTable');
+  
+  // Clear both tables
+  tbody.innerHTML = '';
+  if (recentOrdersTable) recentOrdersTable.innerHTML = '';
+  
+  if (orders.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-[#6a7681]">No orders found</td></tr>';
+    if (recentOrdersTable) {
+      recentOrdersTable.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-[#6a7681]">No recent orders</td></tr>';
+    }
+    return;
+  }
+  
+  orders.forEach(order => {
+    const tr = document.createElement('tr');
+    tr.className = 'border-b border-[#d1e6d9] hover:bg-[#f8fafc] cursor-pointer';
+      const statusColor = order.status === 'Completed' ? 'text-[#10b981] bg-[#ecfdf5]' : 'text-[#f59e0b] bg-[#fffbeb]';
+      // Calculate total attachment count including fabric and style attachments
+    let attachmentCount = Array.isArray(order.attachments) ? order.attachments.length : 0;
+    if (order.fabricAttachment) attachmentCount++;
+    if (order.styleAttachment) attachmentCount++;
+    if (order.techpackAttachment) attachmentCount++;
+      // TechPack upload functionality
+    const techpackHtml = order.techpackAttachment ? 
+      `<div class="techpack-cell flex items-center gap-2">
+        <button onclick="previewFile(event, '${order.techpackAttachment.url}', '${order.techpackAttachment.name}', '${order.techpackAttachment.type}')" 
+                class="text-[#51946b] hover:text-[#3d7354] text-sm font-medium flex items-center gap-1" 
+                title="Preview ${order.techpackAttachment.name}">
+          📎 ${order.techpackAttachment.name.substring(0, 12)}${order.techpackAttachment.name.length > 12 ? '...' : ''}
+        </button>
+      </div>` : 
+      `<div class="techpack-cell flex items-center gap-2">
+        <input type="file" id="techpack-${order.id}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" 
+               onchange="uploadTechpack(${order.id}, this)" class="hidden">
+        <button onclick="document.getElementById('techpack-${order.id}').click()" 
+                class="bg-[#51946b] hover:bg-[#3d7354] text-white px-2 py-1 rounded text-xs font-medium">
+          + TechPack
+        </button>
+      </div>`;
+    
+    tr.innerHTML = `
+      <td class="px-4 py-3 text-[#111518] text-sm">#${order.id}</td>
+      <td class="px-4 py-3 text-[#111518] text-sm">${order.customer}</td>
+      <td class="px-4 py-3 text-[#111518] text-sm">${order.category || order.type || ''}</td>
+      <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">${order.status}</span></td>
+      <td class="px-4 py-3">${techpackHtml}</td>
+      <td class="px-4 py-3 text-[#111518] text-sm">${order.deliveryDate || ''}</td>
+      <td class="px-4 py-3 text-[#111518] text-sm">📎 ${attachmentCount}</td>
+      <td class="px-4 py-3">
+        <button onclick="event.stopPropagation(); printOrder(${order.id})" 
+                style="background-color: #6f42c1; color: white; border: 1px solid #6f42c1; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#5a2d91'; this.style.borderColor='#5a2d91'; this.style.transform='translateY(-1px)'"
+                onmouseout="this.style.backgroundColor='#6f42c1'; this.style.borderColor='#6f42c1'; this.style.transform='translateY(0)'"
+                title="Print Order Details">
+          🖨️ Print
+        </button>
+      </td>
+    `;
+    tr.onclick = () => displayOrderPreview(order.id);
+    tbody.appendChild(tr);
+  });
+  
+  // Render recent orders for dashboard (last 5)
+  if (recentOrdersTable) {
+    const recentOrders = orders.slice(-5).reverse();
+    recentOrders.forEach(order => {
+      const tr = document.createElement('tr');
+      tr.className = 'border-b border-[#d1e6d9] hover:bg-[#f8fafc]';
+      
+      const statusColor = order.status === 'Completed' ? 'text-[#10b981] bg-[#ecfdf5]' : 'text-[#f59e0b] bg-[#fffbeb]';
+      
+      tr.innerHTML = `
+        <td class="px-4 py-3 text-[#111518] text-sm">#${order.id}</td>
+        <td class="px-4 py-3 text-[#111518] text-sm">${order.customer}</td>
+        <td class="px-4 py-3"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">${order.status}</span></td>
+        <td class="px-4 py-3 text-[#111518] text-sm">${order.deliveryDate || ''}</td>
+      `;
+      recentOrdersTable.appendChild(tr);
+    });
+  }
+}
+
+// --- Order Preview Rendering ---
+function displayOrderPreview(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  const previewPanel = document.getElementById('orderPreviewPanel');
+  const detailsContent = document.getElementById('orderDetailsContent');
+  const previewOrderTitle = document.getElementById('previewOrderTitle');
+
+  if (!order) {
+    detailsContent.innerHTML = '<p>Order not found.</p>';
+    previewPanel.style.display = 'block'; // Show panel even if order not found
+    return;
+  }
+  previewOrderTitle.textContent = `Details for Order #${order.id}`;
+  
+  // Handle fabric attachment
+  let fabricAttachmentHtml = '';
+  if (order.fabricAttachment) {
+    const icon = order.fabricAttachment.type && order.fabricAttachment.type.startsWith('image/') ? '🖼️' : '📄';
+    fabricAttachmentHtml = `<p><strong>Fabric Attachment:</strong> ${icon} <a href="${order.fabricAttachment.url}" target="_blank" title="View file: ${order.fabricAttachment.name}">${order.fabricAttachment.name}</a> (${(order.fabricAttachment.size / 1024).toFixed(1)} KB)</p>`;
+  }
+    // Handle style attachment
+  let styleAttachmentHtml = '';
+  if (order.styleAttachment) {
+    const icon = order.styleAttachment.type && order.styleAttachment.type.startsWith('image/') ? '🖼️' : '📄';
+    styleAttachmentHtml = `<p><strong>Style Attachment:</strong> ${icon} <a href="${order.styleAttachment.url}" target="_blank" title="View file: ${order.styleAttachment.name}">${order.styleAttachment.name}</a> (${(order.styleAttachment.size / 1024).toFixed(1)} KB)</p>`;
+  }
+  
+  // Handle techpack attachment
+  let techpackAttachmentHtml = '';
+  if (order.techpackAttachment) {
+    const icon = order.techpackAttachment.type && order.techpackAttachment.type.startsWith('image/') ? '🖼️' : '📄';
+    techpackAttachmentHtml = `<p><strong>TechPack Attachment:</strong> ${icon} <a href="${order.techpackAttachment.url}" target="_blank" title="View file: ${order.techpackAttachment.name}">${order.techpackAttachment.name}</a> (${(order.techpackAttachment.size / 1024).toFixed(1)} KB)</p>`;
+  }
+  
+  let attachmentsHtml = '<h4>Additional Attachments:</h4>';
+  if (order.attachments && order.attachments.length > 0) {
+    attachmentsHtml += '<ul class="attachment-list">';
+    order.attachments.forEach(att => {
+      const icon = att.type && att.type.startsWith('image/') ? '🖼️' : '📄';
+      // Displaying actual thumbnails from Google Drive requires more complex handling (e.g., thumbnailLink)
+      // For now, we show an icon and the name.
+      attachmentsHtml += `<li>${icon} <a href="${att.url}" target="_blank" title="View file: ${att.name}">${att.name}</a> (${(att.size / 1024).toFixed(1)} KB)</li>`;
+    });
+    attachmentsHtml += '</ul>';
+  } else {
+    attachmentsHtml += '<p>No additional attachments.</p>';
+  }
+  detailsContent.innerHTML = `
+    <p><strong>Customer:</strong> ${order.customer}</p>
+    <p><strong>Category:</strong> ${order.category || 'N/A'}</p>
+    <p><strong>Type:</strong> ${order.type || 'N/A'}</p>
+    <p><strong>Fabric Name:</strong> ${order.fabricName || 'N/A'}</p>
+    <p><strong>Style Reference:</strong> ${order.styleReference || 'N/A'}</p>
+    <p><strong>Description:</strong> ${order.description || 'N/A'}</p>
+    <p><strong>Status:</strong> ${order.status}</p>    <p><strong>Trial Date:</strong> ${order.trialDate || 'N/A'}</p>
+    <p><strong>Delivery Date:</strong> ${order.deliveryDate}</p>
+    ${fabricAttachmentHtml}
+    ${styleAttachmentHtml}
+    ${techpackAttachmentHtml}
+    ${attachmentsHtml}
+  `;
+  previewPanel.style.display = 'block';
+}
+
+// --- Customers Table Rendering & Editing ---
+function renderCustomers() {
+  const tbody = document.getElementById('customersTableBody');
+  tbody.innerHTML = '';  if (customers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-[#6a7681]">No customers found</td></tr>';
+    return;
+  }
+  customers.forEach((customer, idx) => {
+    const tr = document.createElement('tr');
+    tr.className = 'border-b border-[#d1e6d9] hover:bg-[#f8fafc]';
+    tr.innerHTML = `
+      <td class="px-4 py-3 text-[#111518] text-sm"><span class="customer-name">${customer.name}</span></td>
+      <td class="px-4 py-3 text-[#111518] text-sm"><span class="customer-phone">${customer.phone}</span></td>
+      <td class="px-4 py-3 text-[#111518] text-sm">${customer.orders}</td>
+      <td class="px-4 py-3"><button class="edit-btn px-3 py-1 bg-[#51946b] text-white rounded-lg text-sm hover:bg-[#3d7354]" data-idx="${idx}">Edit</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // Add edit listeners
+  tbody.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.onclick = function() {
+      const idx = +btn.dataset.idx;
+      editCustomerRow(idx);
+    };
+  });
+}
+function editCustomerRow(idx) {
+  const tbody = document.getElementById('customersTableBody');
+  const tr = tbody.children[idx];
+  const customer = customers[idx];  tr.innerHTML = `
+    <td class="px-4 py-3"><input value="${customer.name}" class="w-full px-2 py-1 border border-[#d1e6d9] rounded text-sm" id="editName${idx}"></td>
+    <td class="px-4 py-3"><input value="${customer.phone}" class="w-full px-2 py-1 border border-[#d1e6d9] rounded text-sm" id="editPhone${idx}"></td>
+    <td class="px-4 py-3 text-[#111518] text-sm">${customer.orders}</td>
+    <td class="px-4 py-3"><button class="save-btn px-3 py-1 bg-[#10b981] text-white rounded-lg text-sm hover:bg-[#059669]" data-idx="${idx}">Save</button></td>
+  `;
+  tr.querySelector('.save-btn').onclick = function() {
+    customers[idx].name = document.getElementById(`editName${idx}`).value;
+    customers[idx].phone = document.getElementById(`editPhone${idx}`).value;
+    saveData();
+    renderCustomers();
+  };
+}
+
+// --- Create Order Form Logic ---
+document.getElementById('createOrderForm').onsubmit = async function(e) {
+  e.preventDefault();
+  const form = e.target;
+
+  console.log('Form submitted!'); // Debug log
+  
+  // Handle file uploads locally (without cloud storage)
+  let uploadedFileDetails = [];
+  let fabricFileDetails = null;
+  let styleFileDetails = null;
+  
+  // Handle fabric attachment if present (local file simulation)
+  const fabricFile = form.fabricAttachment.files[0];
+  if (fabricFile) {
+    fabricFileDetails = {
+      id: 'local_fab_' + Date.now(),
+      name: fabricFile.name,
+      url: '#local_file', // Local file reference
+      size: fabricFile.size,
+      type: fabricFile.type
+    };
+    console.log(`Fabric file added: ${fabricFile.name}`);
+  }
+  
+  // Handle style attachment if present (local file simulation)
+  const styleFile = form.styleAttachment.files[0];
+  if (styleFile) {
+    styleFileDetails = {
+      id: 'local_style_' + Date.now(),
+      name: styleFile.name,
+      url: '#local_file', // Local file reference
+      size: styleFile.size,
+      type: styleFile.type
+    };
+    console.log(`Style file added: ${styleFile.name}`);
+  }
+
+  // Handle additional attachments if present (using custom file selection)
+  const attachmentInput = document.getElementById('orderAttachments');
+  const filesToUpload = window.selectedFiles || [];
+  if (filesToUpload.length > 0) {
+    console.log(`Adding ${filesToUpload.length} additional files...`);
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const file = filesToUpload[i];
+      uploadedFileDetails.push({
+        id: 'local_att_' + Date.now() + '_' + i,
+        name: file.name,
+        url: '#local_file', // Local file reference
+        size: file.size,
+        type: file.type
+      });
+      console.log(`Additional file added: ${file.name}`);
+    }
+  }
+
+  const newOrder = {
+    id: orders.length > 0 ? Math.max(0, ...orders.map(o => o.id)) + 1 : 1,
+    customer: form.customerName.value,
+    phone: form.phone.value, // Add phone to order
+    category: form.category.value,
+    type: form.type.value,
+    fabricName: form.fabricName.value,
+    styleReference: form.styleReference.value,
+    description: form.description.value,
+    status: 'In Progress',
+    trialDate: form.trialDate.value,
+    deliveryDate: form.deliveryDate.value,
+    measurements: { 
+      chest: parseFloat(form.chest.value) || 0, 
+      waist: parseFloat(form.waist.value) || 0, 
+      hip: parseFloat(form.hip.value) || 0
+    },
+    attachments: uploadedFileDetails,
+    fabricAttachment: fabricFileDetails,
+    styleAttachment: styleFileDetails
+  };
+  
+  console.log('Creating new order:', newOrder); // Debug log
+  orders.push(newOrder);
+
+  // Add customer if not exists
+  let custIdx = customers.findIndex(c => c.phone === form.phone.value);
+  if (custIdx === -1) {
+    customers.push({
+      name: newOrder.customer,
+      phone: form.phone.value,
+      orders: 1
+    });
+    console.log('Added new customer:', newOrder.customer);
+  } else {
+    customers[custIdx].orders++;
+    console.log('Updated existing customer order count');
+  }
+  
+  // Save data and update displays
+  saveData();
+  renderOrders();
+  renderDashboard();
+  renderCustomers();
+  
+  // Show success message
+  alert(`✅ Order #${newOrder.id} created successfully for ${newOrder.customer}!`);
+  
+  // Reset form
+  form.reset();
+  
+  // Clear selected files
+  if (window.selectedFiles) {
+    window.selectedFiles = [];
+  }
+  
+  // Clear file previews
+  document.getElementById('fabricPreview').classList.add('hidden');
+  document.getElementById('stylePreview').classList.add('hidden');
+  document.getElementById('selectedFilesDisplay').classList.add('hidden');
+  
+  // Switch to Orders page to show the new order
+  showPage('orders');
+  
+  console.log('Order creation completed successfully!');
+};    // --- File Preview Handlers ---
+// Handle fabric attachment file preview
+document.getElementById('fabricAttachment').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('fabricPreview');
+  
+  if (file) {
+    preview.innerHTML = `
+      <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg cursor-pointer" onclick="previewSingleFile(this, 'fabric')">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">${file.type.startsWith('image/') ? '🖼️' : '📄'}</span>
+          <span class="text-sm font-medium">${file.name}</span>
+          <span class="text-xs text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
+        </div>
+        <span class="text-xs text-blue-600">Click to preview</span>
+      </div>
+    `;
+    preview.classList.remove('hidden');
+  } else {
+    preview.classList.add('hidden');
+  }
+});
+
+// Handle style attachment file preview
+document.getElementById('styleAttachment').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('stylePreview');
+  
+  if (file) {
+    preview.innerHTML = `
+      <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg cursor-pointer" onclick="previewSingleFile(this, 'style')">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">${file.type.startsWith('image/') ? '🖼️' : '📄'}</span>
+          <span class="text-sm font-medium">${file.name}</span>
+          <span class="text-xs text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
+        </div>
+        <span class="text-xs text-blue-600">Click to preview</span>
+      </div>
+    `;
+    preview.classList.remove('hidden');
+  } else {
+    preview.classList.add('hidden');
+  }
+});
+
+// Function to preview single files (fabric/style)
+window.previewSingleFile = function(element, type) {
+  const fileInput = type === 'fabric' ? 
+    document.getElementById('fabricAttachment') : 
+    document.getElementById('styleAttachment');
+  
+  const file = fileInput.files[0];
+  if (file) {
+    currentPreviewFile = file;
+    showFilePreview(file);
+  }
+};
+
+// --- Page switching logic ---
+console.log('Tab switching script loaded');
+// Removed authentication-related elements since this is a local dashboard
+const appContainer = document.getElementById('appContainer');
+const navItems = document.querySelectorAll('.nav-item');
+const pageSections = {
+  dashboard: document.getElementById('dashboardPage'),
+  orders: document.getElementById('ordersPage'),
+  customers: document.getElementById('customersPage'),
+  createOrder: document.getElementById('createOrderPage'),
+  settings: document.getElementById('settingsPage')
+};
+// Add debug log for navItems and pageSections
+console.log('navItems:', navItems);
+console.log('pageSections:', pageSections);
+navItems.forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    navItems.forEach(i => i.classList.remove('text-[#51946b]', 'font-bold'));
+    item.classList.add('text-[#51946b]', 'font-bold');
+    Object.keys(pageSections).forEach(key => {
+      if (pageSections[key]) pageSections[key].style.display = 'none';
+    });
+    const targetPage = item.dataset.page;
+    if (pageSections[targetPage]) {
+      pageSections[targetPage].style.display = '';
+      console.log('Switched to page:', targetPage);
+    } else {
+      console.warn('No section found for page:', targetPage);
+    }
+  });
+});
+// Show dashboard by default
+if (pageSections.dashboard) pageSections.dashboard.style.display = '';
+
+    // === CRITICAL: Force Button Visibility ===
+    // Ensure all buttons are visible when page loads
+    function ensureButtonVisibility() {
+      console.log('🔧 Ensuring button visibility...');
+      
+      const buttonIds = [
+        'printDashboardBtn',
+        'printOrdersBtn', 
+        'exportOrdersBtn',
+        'createOrderNavBtnFromOrdersPage',
+        'printCreateOrderBtn'
+      ];
+      
+      buttonIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.style.visibility = 'visible';
+          btn.style.opacity = '1';
+          btn.style.display = 'flex';
+          btn.style.zIndex = '1000';
+          console.log(`✅ Button ${id} visibility ensured`);
+        } else {
+          console.warn(`⚠️ Button ${id} not found`);
+        }
+      });
+      
+      // Also apply to any buttons with these classes
+      const buttonClasses = ['export-button', 'print-button', 'create-button'];
+      buttonClasses.forEach(className => {
+        const buttons = document.querySelectorAll(`.${className}`);
+        buttons.forEach(btn => {
+          btn.style.visibility = 'visible';
+          btn.style.opacity = '1';
+          btn.style.display = 'flex';
+          btn.style.zIndex = '1000';
+        });
+        console.log(`✅ ${buttons.length} buttons with class ${className} visibility ensured`);
+      });
+    }
+    
+    // Run on DOM content loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', ensureButtonVisibility);
+    } else {
+      ensureButtonVisibility();
+    }
+    
+    // Also run after a brief delay to catch any dynamic buttons
+    setTimeout(ensureButtonVisibility, 100);
+    setTimeout(ensureButtonVisibility, 500);
+
+    // === EXISTING BUTTON EVENT HANDLERS ===
+  </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Tab navigation for sidebar and mobile nav
+    const pages = {
+      dashboard: document.getElementById('dashboardPage'),
+      orders: document.getElementById('ordersPage'),
+      customers: document.getElementById('customersPage'),
+      createOrder: document.getElementById('createOrderPage'),
+      settings: document.getElementById('settingsPage'),
+    };
+    function showPage(page) {
+      Object.keys(pages).forEach(key => {
+        if (pages[key]) pages[key].style.display = (key === page) ? '' : 'none';
+      });
+    }
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-item.nav-item').forEach(item => {
+      item.addEventListener('click', function () {
+        const page = this.getAttribute('data-page');
+        showPage(page);
+      });
+    });
+    // Mobile navigation
+    document.querySelectorAll('.mobile-nav-item.nav-item').forEach(item => {
+      item.addEventListener('click', function () {
+        const page = this.getAttribute('data-page');
+        showPage(page);
+        document.getElementById('mobileNavMenu').style.display = 'none';
+      });
+    });
+    // Show dashboard by default
+    showPage('dashboard');
+    
+    // Handle "Create Order" button from Orders page
+    const createOrderNavBtn = document.getElementById('createOrderNavBtnFromOrdersPage');
+    if (createOrderNavBtn) {
+      createOrderNavBtn.addEventListener('click', function() {
+        showPage('createOrder');
+      });
+    }
+    
+    // Handle Excel Export button
+    const exportOrdersBtn = document.getElementById('exportOrdersBtn');
+    if (exportOrdersBtn) {
+      exportOrdersBtn.addEventListener('click', function() {
+        exportToExcel();
+      });
+    }
+    
+    // Handle Print PDF buttons
+    const printDashboardBtn = document.getElementById('printDashboardBtn');
+    if (printDashboardBtn) {
+      printDashboardBtn.addEventListener('click', function() {
+        printDashboard();
+      });
+    }
+    
+    const printOrdersBtn = document.getElementById('printOrdersBtn');
+    if (printOrdersBtn) {
+      printOrdersBtn.addEventListener('click', function() {
+        printOrders();
+      });
+    }
+    
+    const printCreateOrderBtn = document.getElementById('printCreateOrderBtn');
+    if (printCreateOrderBtn) {
+      printCreateOrderBtn.addEventListener('click', function() {
+        printCreateOrderForm();
+      });
+    }
+    
+    // Handle order search functionality
+    const orderSearchInput = document.getElementById('orderSearchInput');
+    if (orderSearchInput) {
+      orderSearchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterOrders(searchTerm);
+      });
+    }
+    
+    function filterOrders(searchTerm) {
+      const tableBody = document.getElementById('ordersTableBody');
+      if (!tableBody) return;
+      
+      const rows = tableBody.querySelectorAll('tr');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length <= 1) return; // Skip empty state row
+        
+        const rowText = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+        const shouldShow = !searchTerm || rowText.includes(searchTerm);
+        
+        row.style.display = shouldShow ? '' : 'none';
+        if (shouldShow) visibleCount++;
+      });
+      
+      // Show/hide "no orders found" message
+      const noOrdersRow = tableBody.querySelector('tr td[colspan]');
+      if (noOrdersRow) {
+        noOrdersRow.parentElement.style.display = visibleCount === 0 && searchTerm ? '' : 'none';
+        if (visibleCount === 0 && searchTerm) {
+          noOrdersRow.textContent = `No orders found matching "${searchTerm}"`;
+        } else {
+          noOrdersRow.textContent = 'No orders found';
+        }
+      }
+    }
+    
+    // --- Additional Files Upload Functionality ---
+    const orderAttachments = document.getElementById('orderAttachments');
+    const selectFilesBtn = document.getElementById('selectFilesBtn');
+    const addMoreFilesBtn = document.getElementById('addMoreFilesBtn');
+    const clearAllFilesBtn = document.getElementById('clearAllFilesBtn');
+    const selectedFilesDisplay = document.getElementById('selectedFilesDisplay');
+    const filesList = document.getElementById('filesList');
+    const fileCount = document.getElementById('fileCount');
+    const additionalAttachmentsZone = document.getElementById('additionalAttachmentsZone');
+    
+    // Make selectedFiles globally accessible for form handler
+    window.selectedFiles = [];
+    
+    // Handle file selection button click
+    if (selectFilesBtn && orderAttachments) {
+      selectFilesBtn.addEventListener('click', () => {
+        orderAttachments.click();
+      });
+    }
+    
+    // Handle add more files button
+    if (addMoreFilesBtn && orderAttachments) {
+      addMoreFilesBtn.addEventListener('click', () => {
+        orderAttachments.click();
+      });
+    }
+    
+    // Handle clear all files button
+    if (clearAllFilesBtn) {
+      clearAllFilesBtn.addEventListener('click', () => {
+        window.selectedFiles = [];
+        orderAttachments.value = '';
+        updateFileDisplay();
+      });
+    }
+    
+    // Handle drag and drop
+    if (additionalAttachmentsZone) {
+      additionalAttachmentsZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        additionalAttachmentsZone.classList.add('border-[#51946b]', 'bg-[#f0f8f0]');
+      });
+      
+      additionalAttachmentsZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        additionalAttachmentsZone.classList.remove('border-[#51946b]', 'bg-[#f0f8f0]');
+      });
+      
+      additionalAttachmentsZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        additionalAttachmentsZone.classList.remove('border-[#51946b]', 'bg-[#f0f8f0]');
+        const files = Array.from(e.dataTransfer.files);
+        addFilesToSelection(files);
+      });
+    }
+    
+    // Handle file selection change
+    if (orderAttachments) {
+      orderAttachments.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        addFilesToSelection(files);
+      });
+    }
+    
+    function addFilesToSelection(files) {
+      const validFiles = files.filter(file => {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          alert(`File "${file.name}" exceeds 10MB limit and will be skipped.`);
+          return false;
+        }
+        return true;
+      });
+      
+      window.selectedFiles = [...window.selectedFiles, ...validFiles];
+      updateFileDisplay();
+      console.log(`Added ${validFiles.length} files. Total: ${window.selectedFiles.length}`);
+    }
+    
+    function updateFileDisplay() {
+      if (!selectedFilesDisplay || !filesList || !fileCount) return;
+      
+      if (window.selectedFiles.length === 0) {
+        selectedFilesDisplay.classList.add('hidden');
+        addMoreFilesBtn?.classList.add('hidden');
+        clearAllFilesBtn?.classList.add('hidden');
+        return;
+      }
+      
+      selectedFilesDisplay.classList.remove('hidden');
+      addMoreFilesBtn?.classList.remove('hidden');
+      clearAllFilesBtn?.classList.remove('hidden');
+      
+      fileCount.textContent = window.selectedFiles.length;
+      
+      filesList.innerHTML = window.selectedFiles.map((file, index) => {
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        const fileIcon = getFileIcon(file.type);
+        
+        return `
+          <div class="flex items-center justify-between p-2 bg-white border border-[#e5e7eb] rounded-lg hover:bg-[#f9fafb] transition-colors">
+            <div class="flex items-center space-x-3 flex-1">
+              <span class="text-lg">${fileIcon}</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-[#111518] truncate">${file.name}</p>
+                <p class="text-xs text-[#6a7681]">${fileSize} MB • ${file.type || 'Unknown type'}</p>
+              </div>
+            </div>
+            <button type="button" onclick="removeFile(${index})" class="text-[#dc3545] hover:text-[#c82333] p-1" title="Remove file">
+              🗑️
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function getFileIcon(mimeType) {
+      if (mimeType.startsWith('image/')) return '🖼️';
+      if (mimeType.includes('pdf')) return '📄';
+      if (mimeType.includes('document') || mimeType.includes('word')) return '📝';
+      if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return '📊';
+      if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📊';
+      return '📎';
+    }
+    
+    // Make removeFile function globally accessible
+    window.removeFile = function(index) {
+      window.selectedFiles.splice(index, 1);
+      updateFileDisplay();
+      console.log(`Removed file at index ${index}. Remaining: ${window.selectedFiles.length}`);
+    };
+    
+    // Update the form data transfer for additional files
+    if (orderAttachments) {
+      // Create a custom property to access selected files from form handler
+      orderAttachments._customSelectedFiles = window.selectedFiles;
+      
+      // Override the files property getter
+      Object.defineProperty(orderAttachments, 'files', {
+        get: function() {
+          // Return a FileList-like object with our selected files
+          const fileList = {
+            length: window.selectedFiles.length,
+            item: function(index) { return window.selectedFiles[index]; },
+            [Symbol.iterator]: function* () {
+              for (let i = 0; i < window.selectedFiles.length; i++) {
+                yield window.selectedFiles[i];
+              }
+            }
+          };
+          
+          // Add numeric indexed properties
+          for (let i = 0; i < window.selectedFiles.length; i++) {
+            fileList[i] = window.selectedFiles[i];
+          }
+          
+          return fileList;
+        }
+      });
+    }
+    
+    // --- PDF Print Functionality ---
+    function printDashboard() {
+      // Create print-specific styles
+      const printStyles = `
+        <style media="print">
+          @page { 
+            size: A4; 
+            margin: 1in;
+          }
+          body * { visibility: hidden; }
+          #dashboardPage, #dashboardPage * { visibility: visible; }
+          #dashboardPage { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%;
+          }
+          .header, .sidebar, #printDashboardBtn { display: none !important; }
+          .main-content { padding: 0 !important; margin: 0 !important; }
+          .page-section { background: white !important; }
+          
+          /* Print header */
+          #dashboardPage:before {
+            content: "Fashion Admin Dashboard Report - ${new Date().toLocaleDateString()}";
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #51946b;
+          }
+        </style>
+      `;
+      
+      // Add print styles to head
+      const styleElement = document.createElement('div');
+      styleElement.innerHTML = printStyles;
+      document.head.appendChild(styleElement.firstElementChild);
+      
+      // Trigger print
+      window.print();
+      
+      // Remove print styles after printing
+      setTimeout(() => {
+        document.head.removeChild(document.head.lastElementChild);
+      }, 1000);
+    }
+    
+    function printOrders() {
+      // Create print-specific styles for orders
+      const printStyles = `
+        <style media="print">
+          @page { 
+            size: A4 landscape; 
+            margin: 0.5in;
+          }
+          body * { visibility: hidden; }
+          #ordersPage, #ordersPage * { visibility: visible; }
+          #ordersPage { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%;
+          }
+          .header, .sidebar, #printOrdersBtn, #exportOrdersBtn, #createOrderNavBtnFromOrdersPage, #orderSearchInput { display: none !important; }
+          .main-content { padding: 0 !important; margin: 0 !important; }
+          .page-section { background: white !important; }
+          table { font-size: 10px !important; }
+          th, td { padding: 4px !important; }
+          
+          /* Print header */
+          #ordersPage:before {
+            content: "Orders Report - ${new Date().toLocaleDateString()} - Total: ${orders.length} orders";
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #51946b;
+          }
+        </style>
+      `;
+      
+      // Add print styles
+      const styleElement = document.createElement('div');
+      styleElement.innerHTML = printStyles;
+      document.head.appendChild(styleElement.firstElementChild);
+      
+      // Trigger print
+      window.print();
+      
+      // Remove print styles
+      setTimeout(() => {
+        document.head.removeChild(document.head.lastElementChild);
+      }, 1000);
+    }
+    
+    function printCreateOrderForm() {
+      // Create print-specific styles for create order form
+      const printStyles = `
+        <style media="print">
+          @page { 
+            size: A4; 
+            margin: 0.75in;
+          }
+          body * { visibility: hidden; }
+          #createOrderPage, #createOrderPage * { visibility: visible; }
+          #createOrderPage { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%;
+          }
+          .header, .sidebar, #printCreateOrderBtn { display: none !important; }
+          .main-content { padding: 0 !important; margin: 0 !important; }
+          .page-section { background: white !important; }
+          
+          /* Print header */
+          #createOrderPage:before {
+            content: "Order Form - Fashion Admin Dashboard - ${new Date().toLocaleDateString()}";
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #51946b;
+          }
+          
+          /* Form styling for print */
+          input, select, textarea {
+            border: 1px solid #ccc !important;
+            background: white !important;
+            padding: 5px !important;
+          }
+          
+          label {
+            font-weight: bold !important;
+            margin-top: 10px !important;
+            display: block !important;
+          }
+        </style>
+      `;
+      
+      // Add print styles
+      const styleElement = document.createElement('div');
+      styleElement.innerHTML = printStyles;
+      document.head.appendChild(styleElement.firstElementChild);
+      
+      // Trigger print
+      window.print();
+      
+      // Remove print styles
+      setTimeout(() => {
+        document.head.removeChild(document.head.lastElementChild);
+      }, 1000);
+    }
+    
+    // Function to print individual order (can be called from order details)
+    function printOrder(orderId) {
+      loadData();
+      const order = orders.find(o => o.id === parseInt(orderId));
+      if (!order) {
+        alert('Order not found!');
+        return;
+      }
+      
+      // Create order print content
+      const printContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; border-bottom: 3px solid #51946b; padding-bottom: 20px; margin-bottom: 30px;">
+            <h1 style="color: #51946b; margin: 0;">Fashion Admin Dashboard</h1>
+            <h2 style="margin: 10px 0;">Order Details</h2>
+            <p style="margin: 0; color: #666;">Generated: ${new Date().toLocaleString()}</p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+            <div>
+              <h3 style="color: #51946b; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Order Information</h3>
+              <p><strong>Order ID:</strong> #${order.id}</p>
+              <p><strong>Status:</strong> ${order.status}</p>
+              <p><strong>Category:</strong> ${order.category}</p>
+              <p><strong>Type:</strong> ${order.type}</p>
+              <p><strong>Trial Date:</strong> ${order.trialDate}</p>
+              <p><strong>Delivery Date:</strong> ${order.deliveryDate}</p>
+            </div>
+            
+            <div>
+              <h3 style="color: #51946b; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Customer Information</h3>
+              <p><strong>Name:</strong> ${order.customer}</p>
+              <p><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+              <p><strong>Email:</strong> ${getCustomerEmail(order.customer)}</p>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 30px;">
+            <h3 style="color: #51946b; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Design Details</h3>
+            <p><strong>Fabric:</strong> ${order.fabricName}</p>
+            <p><strong>Style Reference:</strong> ${order.styleReference}</p>
+            <p><strong>Description:</strong> ${order.description}</p>
+          </div>
+          
+          <div style="margin-bottom: 30px;">
+            <h3 style="color: #51946b; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Measurements</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+              <p><strong>Chest:</strong> ${order.measurements?.chest || 'N/A'} inches</p>
+              <p><strong>Waist:</strong> ${order.measurements?.waist || 'N/A'} inches</p>
+              <p><strong>Hip:</strong> ${order.measurements?.hip || 'N/A'} inches</p>
+            </div>
+          </div>
+          
+          <div>
+            <h3 style="color: #51946b; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Attachments</h3>
+            ${order.fabricAttachment ? `<p>• <strong>Fabric Sample:</strong> ${order.fabricAttachment.name}</p>` : ''}
+            ${order.styleAttachment ? `<p>• <strong>Style Reference:</strong> ${order.styleAttachment.name}</p>` : ''}
+            ${order.techpackAttachment ? `<p>• <strong>TechPack:</strong> ${order.techpackAttachment.name}</p>` : ''}
+            ${order.attachments && order.attachments.length > 0 ? 
+              order.attachments.map((att, i) => `<p>• <strong>Additional ${i+1}:</strong> ${att.name}</p>`).join('') : 
+              '<p>No additional attachments</p>'
+            }
+          </div>
+        </div>
+      `;
+      
+      // Open print window
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Order #${order.id} - ${order.customer}</title>
+            <style>
+              @page { size: A4; margin: 1in; }
+              body { margin: 0; padding: 0; }
+            </style>
+          </head>
+          <body>
+            ${printContent}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+    
+    // Make printOrder globally accessible
+    window.printOrder = printOrder;
+    
+    // --- End PDF Print Functionality ---
+    
+    // --- Excel Export Functionality ---
+    function exportToExcel() {
+      try {
+        // Load data
+        loadData();
+        
+        console.log('Starting Excel export with', orders.length, 'orders and', customers.length, 'customers');
+        
+        // Create comprehensive export data
+        const exportData = generateExportData();
+        
+        // Create Excel file with multiple sheets
+        createExcelFile(exportData);
+        
+        console.log('Excel export completed successfully');
+      } catch (error) {
+        console.error('Export failed:', error);
+        alert('Export failed: ' + error.message);
+      }
+    }
+    
+    function generateExportData() {
+      const currentDate = new Date().toISOString().split('T')[0];
+      
+      // Orders Summary Sheet
+      const ordersSummary = orders.map(order => ({
+        'Order ID': order.id,
+        'Customer Name': order.customer,
+        'Phone': order.phone || 'N/A',
+        'Email': getCustomerEmail(order.customer),
+        'Category': order.category,
+        'Type': order.type,
+        'Fabric Name': order.fabricName,
+        'Style Reference': order.styleReference,
+        'Description': order.description,
+        'Status': order.status,
+        'Trial Date': order.trialDate,
+        'Delivery Date': order.deliveryDate,
+        'Chest (inches)': order.measurements?.chest || 'N/A',
+        'Waist (inches)': order.measurements?.waist || 'N/A',
+        'Hip (inches)': order.measurements?.hip || 'N/A',
+        'Fabric Attachment': order.fabricAttachment?.name || 'None',
+        'Style Attachment': order.styleAttachment?.name || 'None',
+        'TechPack Attachment': order.techpackAttachment?.name || 'None',
+        'Additional Attachments': order.attachments?.length || 0,
+        'Total Files': getTotalFileCount(order),
+        'Order Value': 'N/A', // Can be added later
+        'Created Date': currentDate,
+        'Last Modified': currentDate
+      }));
+      
+      // Detailed Measurements Sheet
+      const measurements = orders.map(order => ({
+        'Order ID': order.id,
+        'Customer Name': order.customer,
+        'Chest (inches)': order.measurements?.chest || 0,
+        'Waist (inches)': order.measurements?.waist || 0,
+        'Hip (inches)': order.measurements?.hip || 0,
+        'Status': order.status,
+        'Trial Date': order.trialDate,
+        'Delivery Date': order.deliveryDate,
+        'Notes': order.description
+      }));
+      
+      // Customers Summary Sheet
+      const customersSummary = customers.map(customer => ({
+        'Customer Name': customer.name,
+        'Email': customer.email || 'N/A',
+        'Phone': customer.phone || 'N/A',
+        'Total Orders': customer.orders || 0,
+        'Recent Orders': getCustomerRecentOrders(customer.name),
+        'Status': getCustomerStatus(customer.name),
+        'Customer Since': getCustomerFirstOrderDate(customer.name),
+        'Last Order Date': getCustomerLastOrderDate(customer.name)
+      }));
+      
+      // File Attachments Sheet
+      const attachments = [];
+      orders.forEach(order => {
+        if (order.fabricAttachment) {
+          attachments.push({
+            'Order ID': order.id,
+            'Customer': order.customer,
+            'File Type': 'Fabric Sample',
+            'File Name': order.fabricAttachment.name,
+            'File Size (KB)': Math.round(order.fabricAttachment.size / 1024),
+            'File Format': order.fabricAttachment.type,
+            'Upload Date': currentDate
+          });
+        }
+        if (order.styleAttachment) {
+          attachments.push({
+            'Order ID': order.id,
+            'Customer': order.customer,
+            'File Type': 'Style Reference',
+            'File Name': order.styleAttachment.name,
+            'File Size (KB)': Math.round(order.styleAttachment.size / 1024),
+            'File Format': order.styleAttachment.type,
+            'Upload Date': currentDate
+          });
+        }
+        if (order.techpackAttachment) {
+          attachments.push({
+            'Order ID': order.id,
+            'Customer': order.customer,
+            'File Type': 'TechPack',
+            'File Name': order.techpackAttachment.name,
+            'File Size (KB)': Math.round(order.techpackAttachment.size / 1024),
+            'File Format': order.techpackAttachment.type,
+            'Upload Date': currentDate
+          });
+        }
+        if (order.attachments) {
+          order.attachments.forEach((att, index) => {
+            attachments.push({
+              'Order ID': order.id,
+              'Customer': order.customer,
+              'File Type': 'Additional Attachment ' + (index + 1),
+              'File Name': att.name,
+              'File Size (KB)': Math.round(att.size / 1024),
+              'File Format': att.type,
+              'Upload Date': currentDate
+            });
+          });
+        }
+      });
+      
+      // Business Statistics Sheet
+      const stats = {
+        'Total Orders': orders.length,
+        'Pending Orders': orders.filter(o => o.status === 'Pending').length,
+        'In Progress Orders': orders.filter(o => o.status === 'In Progress').length,
+        'Completed Orders': orders.filter(o => o.status === 'Completed').length,
+        'Cancelled Orders': orders.filter(o => o.status === 'Cancelled').length,
+        'Total Customers': customers.length,
+        'Active Customers': customers.filter(c => c.orders > 0).length,
+        'Custom Orders': orders.filter(o => o.type === 'Custom').length,
+        'Standard Orders': orders.filter(o => o.type === 'Standard').length,
+        'Total Attachments': attachments.length,
+        'Export Date': new Date().toLocaleString(),
+        'Data Version': '1.0'
+      };
+      
+      const businessStats = Object.entries(stats).map(([key, value]) => ({
+        'Metric': key,
+        'Value': value,
+        'Generated': new Date().toLocaleString()
+      }));
+      
+      return {
+        ordersSummary,
+        measurements,
+        customersSummary,
+        attachments,
+        businessStats
+      };
+    }
+    
+    // Helper functions for export data
+    function getCustomerEmail(customerName) {
+      const customer = customers.find(c => c.name === customerName);
+      return customer?.email || 'N/A';
+    }
+    
+    function getTotalFileCount(order) {
+      let count = 0;
+      if (order.fabricAttachment) count++;
+      if (order.styleAttachment) count++;
+      if (order.techpackAttachment) count++;
+      if (order.attachments) count += order.attachments.length;
+      return count;
+    }
+    
+    function getCustomerRecentOrders(customerName) {
+      return orders.filter(o => o.customer === customerName).length;
+    }
+    
+    function getCustomerStatus(customerName) {
+      const customerOrders = orders.filter(o => o.customer === customerName);
+      if (customerOrders.length === 0) return 'No Orders';
+      const hasActive = customerOrders.some(o => o.status === 'In Progress' || o.status === 'Pending');
+      return hasActive ? 'Active' : 'Inactive';
+    }
+    
+    function getCustomerFirstOrderDate(customerName) {
+      const customerOrders = orders.filter(o => o.customer === customerName);
+      if (customerOrders.length === 0) return 'N/A';
+      // For demo purposes, using trial date as proxy
+      return customerOrders[0].trialDate || 'N/A';
+    }
+    
+    function getCustomerLastOrderDate(customerName) {
+      const customerOrders = orders.filter(o => o.customer === customerName);
+      if (customerOrders.length === 0) return 'N/A';
+      // For demo purposes, using delivery date as proxy
+      return customerOrders[customerOrders.length - 1].deliveryDate || 'N/A';
+    }
+    
+    function createExcelFile(exportData) {
+      const timestamp = new Date().toISOString().split('T')[0];
+      
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+      
+      // Add each sheet to the workbook
+      const ordersSheet = XLSX.utils.json_to_sheet(exportData.ordersSummary);
+      const customersSheet = XLSX.utils.json_to_sheet(exportData.customersSummary);
+      const measurementsSheet = XLSX.utils.json_to_sheet(exportData.measurements);
+      const attachmentsSheet = XLSX.utils.json_to_sheet(exportData.attachments);
+      const statsSheet = XLSX.utils.json_to_sheet(exportData.businessStats);
+      
+      // Append sheets to workbook
+      XLSX.utils.book_append_sheet(workbook, ordersSheet, "Orders Summary");
+      XLSX.utils.book_append_sheet(workbook, customersSheet, "Customers");
+      XLSX.utils.book_append_sheet(workbook, measurementsSheet, "Measurements");
+      XLSX.utils.book_append_sheet(workbook, attachmentsSheet, "File Attachments");
+      XLSX.utils.book_append_sheet(workbook, statsSheet, "Statistics");
+      
+      // Generate Excel file and download
+      const fileName = `Fashion_Dashboard_Complete_Export_${timestamp}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      
+      alert(`✅ Excel file downloaded successfully!\\n\\nFile: ${fileName}\\n\\nIncludes 5 sheets:\\n• Orders Summary (${exportData.ordersSummary.length} orders)\\n• Customers (${exportData.customersSummary.length} customers)\\n• Measurements Details\\n• File Attachments (${exportData.attachments.length} files)\\n• Business Statistics`);
+      
+      console.log('Excel export completed:', fileName);
+    }
+    
+    function downloadCSV(data, filename) {
+      if (data.length === 0) {
+        console.warn('No data to export for', filename);
+        return;
+      }
+      
+      const headers = Object.keys(data[0]);
+      const csvContent = [
+        headers.join(','),
+        ...data.map(row => 
+          headers.map(header => {
+            const value = row[header];
+            // Escape commas and quotes in CSV
+            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+              return '"' + value.replace(/"/g, '""') + '"';
+            }
+            return value;
+          }).join(',')
+        )
+      ].join('\\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      console.log('Downloaded:', filename, 'with', data.length, 'rows');
+    }
+    
+    // --- End Excel Export Functionality ---
+  });
+</script>
+</body>
+</html>

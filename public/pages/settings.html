@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link
+        rel="stylesheet"
+        as="style"
+        onload="this.rel='stylesheet'"
+        href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+      <!-- CSS Files -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/polyfills.css">
+</head>
+<body>
+    <div class="settings-page">
+        <div class="flex flex-col sm:flex-row sm:justify-between gap-3 p-4">
+            <p class="text-[#121416] tracking-light text-2xl sm:text-[32px] font-bold leading-tight">Settings</p>
+        </div>
+        
+        <div class="p-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Branding Settings -->                <div class="bg-white rounded-lg border border-[#dde1e3] p-6">
+                    <h3 class="text-[#121416] text-lg font-bold mb-4">Branding</h3>
+                    
+                    <!-- Logo Upload Section -->
+                    <div class="mb-6">
+                        <label class="block text-[#111518] text-sm font-medium mb-2">Company Logo</label>
+                        <div class="flex items-start space-x-4">
+                            <div id="logoPreview" class="w-16 h-16 bg-[#f8fafc] border border-[#dbe0e6] rounded-md flex items-center justify-center overflow-hidden">
+                                <div id="logoInitials" class="text-2xl font-bold text-[#0066cc]">VA</div>
+                                <img id="logoImage" class="max-w-full max-h-full object-contain hidden" src="" alt="Company Logo">
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" id="logoUpload" accept="image/*" class="hidden">
+                                <button id="uploadLogoBtn" class="mb-2 w-full sm:w-auto flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-[#0066cc] text-white text-sm font-medium leading-normal tracking-[0.015em] hover:bg-[#0052a3]">
+                                    Upload Logo
+                                </button>
+                                <button id="removeLogoBtn" class="w-full sm:w-auto flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-[#f0f2f5] text-[#111518] text-sm font-medium leading-normal tracking-[0.015em] hover:bg-[#e1e7ed]">
+                                    Remove
+                                </button>
+                                <p class="text-xs text-[#6a7681] mt-2">Recommended size: 512x512px. Max file size: 2MB.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Company Name -->
+                    <div class="mb-6">
+                        <label class="block text-[#111518] text-sm font-medium mb-2" for="companyName">Company Name</label>
+                        <input type="text" id="companyName" class="w-full px-3 py-2 border border-[#dbe0e6] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent" placeholder="Enter company name" value="Varoinmarwah Admin">
+                    </div>
+                    
+                    <!-- Company Initials -->
+                    <div class="mb-6">
+                        <label class="block text-[#111518] text-sm font-medium mb-2" for="companyInitials">Company Initials (shown if no logo)</label>
+                        <input type="text" id="companyInitials" class="w-full px-3 py-2 border border-[#dbe0e6] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent" placeholder="Enter company initials (max 2 chars)" value="VA" maxlength="2">
+                    </div>
+                    
+                    <!-- Save Branding Button -->
+                    <div>
+                        <button id="saveBrandingBtn" class="w-full sm:w-auto flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-[#0066cc] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#0052a3]">
+                            Save Branding Settings
+                        </button>
+                    </div>
+                </div>
+                  <!-- Canva Integration Settings -->
+                <div class="bg-white rounded-lg border border-[#dde1e3] p-6">
+                    <h3 class="text-[#121416] text-lg font-bold mb-4">Canva Integration</h3>
+                    
+                    <!-- Canva Template URL -->
+                    <div class="mb-6">
+                        <label class="block text-[#111518] text-sm font-medium mb-2">Default Canva Template URL</label>
+                        <input type="url" id="canvaTemplateUrl" class="w-full px-3 py-2 border border-[#dbe0e6] rounded-lg focus:ring-2 focus:ring-[#0066cc] focus:border-transparent" placeholder="https://www.canva.com/design/XXX/view">
+                        <p class="text-xs text-[#6a7681] mt-1">Enter the URL of your default Canva template for new orders.</p>
+                    </div>
+                    
+                    <!-- Canva Help Guide -->
+                    <div class="mb-6 bg-[#f0f7ff] border border-[#0066cc]/20 rounded-lg p-4">
+                        <h4 class="text-[#111518] text-base font-medium mb-2">How to link Canva designs:</h4>
+                        <ol class="list-decimal ml-5 text-sm space-y-2">
+                            <li>Go to Canva and open or create your design</li>
+                            <li>Click "Share" in the top right corner</li>
+                            <li>Set permissions to "View" or "Edit" as needed</li>
+                            <li>Copy the link and paste it in the order's Canva URL field</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Save Canva Settings Button -->
+                    <div>
+                        <button id="saveCanvaSettingsBtn" class="w-full sm:w-auto flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-6 bg-[#0066cc] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#0052a3]">
+                            Save Canva Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/pages/settings.js"></script>
+</body>
+</html>

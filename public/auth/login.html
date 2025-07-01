@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Varoinmarwah Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+  />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="../css/main.css">
+  
+  <!-- External Libraries -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <!-- Application Scripts -->
+  <script src="../js/utils.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+  <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="flex justify-center">
+        <div class="flex items-center gap-3">
+          <div class="size-10">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-blue-600">
+              <path d="M24 4L6 16V32L24 44L42 32V16L24 4Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="text-2xl font-bold text-gray-900">Varoinmarwah Admin</span>
+        </div>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+        Welcome Back
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Sign in to your admin dashboard
+      </p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white/80 backdrop-blur-sm py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-white/50">
+        <!-- Features Preview -->
+        <div class="space-y-4 mb-8">
+          <h3 class="text-lg font-medium text-gray-900 text-center">Dashboard Features</h3>
+          <div class="space-y-3">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Manage fashion orders and customers</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Track order progress and analytics</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Cloud storage with Google Drive</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4h10M7 4L5.5 6M17 4l1.5 2M10 11v6M14 11v6M4 7h16v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7z"/>
+                </svg>
+              </div>
+              <span class="text-gray-700">Canva design integration</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+            <div class="mt-1">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+                class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                placeholder="Enter your email"
+                value="admin@varoinmarwah.com"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <div class="mt-1">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                placeholder="Enter your password"
+                value="admin123"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+            </div>
+            <div class="text-sm">
+              <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</a>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
+
+        <!-- Google Sign-In -->
+        <div class="mt-6">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="bg-white px-2 text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div id="googleSignInButton" class="w-full"></div>
+            <button
+              id="googleSignInFallback"
+              type="button"
+              class="flex w-full justify-center items-center gap-3 rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Sign in with Google
+            </button>
+          </div>
+        </div>
+
+        <!-- Demo Credentials -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h4 class="text-sm font-medium text-blue-900 mb-2">Demo Credentials</h4>
+          <div class="text-xs text-blue-700 space-y-1">
+            <p><strong>Email:</strong> admin@varoinmarwah.com</p>
+            <p><strong>Password:</strong> admin123</p>
+            <p class="text-blue-600 mt-2">For demo purposes, you can use these credentials or sign in with Google.</p>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loginLoading" class="hidden mt-4 text-center">
+          <div class="inline-flex items-center gap-2 text-sm text-gray-600">
+            <div class="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+            Signing you in...
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="loginError" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-sm text-red-700" id="loginErrorMessage">Login failed. Please try again.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center">
+      <p class="text-sm text-gray-500">
+        © 2025 Varoinmarwah Admin Dashboard. All rights reserved.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Login Page Controller
+     */
+    class LoginController {
+      constructor() {
+        this.isLoading = false;
+        this.googleInitialized = false;
+      }
+
+      /**
+       * Initialize login page
+       */
+      init() {
+        this.setupEventListeners();
+        this.initGoogleSignIn();
+        this.checkExistingAuth();
+        console.log('🔐 Login page initialized');
+      }
+
+      /**
+       * Setup event listeners
+       */
+      setupEventListeners() {
+        const loginForm = document.getElementById('loginForm');
+        const googleFallbackBtn = document.getElementById('googleSignInFallback');
+
+        loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.handleLogin(e);
+        });
+
+        googleFallbackBtn.addEventListener('click', () => {
+          this.handleGoogleSignIn();
+        });
+      }
+
+      /**
+       * Initialize Google Sign-In
+       */
+      initGoogleSignIn() {
+        if (typeof google !== 'undefined' && google.accounts) {
+          try {            google.accounts.id.initialize({
+              client_id: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com', // Replace with your actual Google Client ID
+              callback: this.handleGoogleCallback.bind(this)
+            });
+
+            google.accounts.id.renderButton(
+              document.getElementById('googleSignInButton'),
+              {
+                theme: 'outline',
+                size: 'large',
+                width: '100%',
+                text: 'signin_with'
+              }
+            );
+
+            this.googleInitialized = true;
+            console.log('✅ Google Sign-In initialized');
+          } catch (error) {
+            console.warn('⚠️ Google Sign-In initialization failed:', error);
+            this.showGoogleFallback();
+          }
+        } else {
+          console.warn('⚠️ Google Identity Services not loaded');
+          this.showGoogleFallback();
+        }
+      }
+
+      /**
+       * Show Google Sign-In fallback button
+       */
+      showGoogleFallback() {
+        const googleButton = document.getElementById('googleSignInButton');
+        const fallbackButton = document.getElementById('googleSignInFallback');
+        
+        if (googleButton) googleButton.style.display = 'none';
+        if (fallbackButton) fallbackButton.style.display = 'flex';
+      }
+
+      /**
+       * Handle regular login form submission
+       */
+      async handleLogin(event) {
+        if (this.isLoading) return;
+
+        const formData = new FormData(event.target);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        if (!email || !password) {
+          this.showError('Please enter both email and password');
+          return;
+        }
+
+        this.setLoading(true);
+        this.hideError();        try {
+          // Simulate API call delay
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // SECURITY WARNING: This is DEMO MODE ONLY
+          // Real authentication must ALWAYS be handled server-side
+          // Never validate credentials on the client side in production
+          
+          showToast('⚠️ Demo Mode: Client-side authentication simulation only', 'warning');
+          console.warn('SECURITY: Demo credentials - replace with server-side authentication');
+          
+          // For demonstration purposes only - always authenticate server-side in production
+          // Demo credentials are visible for testing purposes
+          const isDemoMode = true;
+          
+          if (isDemoMode && (email === 'admin@varoinmarwah.com' || email.includes('demo') || email.includes('test'))) {
+            const user = {
+              id: 'demo-user-' + Date.now(),
+              name: email.split('@')[0],
+              email: email,
+              loginTime: new Date().toISOString()
+            };
+
+            this.handleSuccessfulLogin(user);
+          } else {
+            throw new Error('Invalid email or password');
+          }
+        } catch (error) {
+          console.error('❌ Login error:', error);
+          this.showError(error.message || 'Login failed. Please try again.');
+        } finally {
+          this.setLoading(false);
+        }
+      }
+
+      /**
+       * Handle Google Sign-In callback
+       */
+      handleGoogleCallback(response) {
+        try {
+          const userData = JSON.parse(atob(response.credential.split('.')[1]));
+          const user = {
+            id: userData.sub,
+            name: userData.name,
+            email: userData.email,
+            picture: userData.picture,
+            loginTime: new Date().toISOString()
+          };
+
+          this.handleSuccessfulLogin(user);
+        } catch (error) {
+          console.error('❌ Google Sign-In error:', error);
+          this.showError('Google Sign-In failed. Please try again.');
+        }
+      }
+
+      /**
+       * Handle Google Sign-In button click (fallback)
+       */
+      handleGoogleSignIn() {
+        if (this.googleInitialized && typeof google !== 'undefined') {
+          google.accounts.id.prompt();
+        } else {
+          // Demo Google login
+          const user = {
+            id: 'google-demo-user',
+            name: 'Demo User',
+            email: 'demo@google.com',
+            picture: null,
+            loginTime: new Date().toISOString()
+          };
+          this.handleSuccessfulLogin(user);
+        }
+      }
+
+      /**
+       * Handle successful login
+       */
+      handleSuccessfulLogin(user) {
+        // Store user data
+        Storage.set('user', user);
+        
+        showToast('Login successful! Redirecting...', 'success');
+        
+        // Redirect to main dashboard
+        setTimeout(() => {
+          window.location.href = '../index.html';
+        }, 1500);
+
+        console.log('✅ User logged in:', user.name);
+      }
+
+      /**
+       * Check for existing authentication
+       */
+      checkExistingAuth() {
+        const existingUser = Storage.get('user');
+        if (existingUser) {
+          console.log('👤 User already authenticated, redirecting...');
+          showToast('Already logged in, redirecting...', 'info');
+          setTimeout(() => {
+            window.location.href = '../index.html';
+          }, 1000);
+        }
+      }
+
+      /**
+       * Set loading state
+       */
+      setLoading(loading) {
+        this.isLoading = loading;
+        const loadingElement = document.getElementById('loginLoading');
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        if (loadingElement) {
+          loadingElement.classList.toggle('hidden', !loading);
+        }
+
+        if (submitButton) {
+          submitButton.disabled = loading;
+          submitButton.textContent = loading ? 'Signing in...' : 'Sign in';
+        }
+      }
+
+      /**
+       * Show error message
+       */
+      showError(message) {
+        const errorElement = document.getElementById('loginError');
+        const errorMessageElement = document.getElementById('loginErrorMessage');
+
+        if (errorElement && errorMessageElement) {
+          errorMessageElement.textContent = message;
+          errorElement.classList.remove('hidden');
+        }
+      }
+
+      /**
+       * Hide error message
+       */
+      hideError() {
+        const errorElement = document.getElementById('loginError');
+        if (errorElement) {
+          errorElement.classList.add('hidden');
+        }
+      }
+    }    // Initialize login controller when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginController = new LoginController();
+      loginController.init();
+    });
+  </script>
+</body>
+</html>

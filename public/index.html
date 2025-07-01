@@ -1,0 +1,107 @@
+<!DOCTYPE html>  />
+    <!-- CSS Files -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/polyfills.css">`lang="en">
+<head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Varoinmarwah Admin Dashboard - File management, uploads, and Google Drive integration">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3B82F6">
+  <title>Varoinmarwah Admin Dashboard</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link
+    rel="stylesheet"
+    as="style"
+    onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+  />
+    <!-- TailwindCSS (Production version) -->
+  <link rel="stylesheet" href="css/main.css">
+    <!-- CSS Files -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/polyfills.css">
+  
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Core Application Files -->
+  <script src="extension-conflict-handler.js"></script>
+  <script src="google-drive-storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  
+  <!-- Performance optimization: preload critical components -->
+  <link rel="preload" as="script" href="components/navigation.js">
+  <link rel="preload" as="script" href="components/mobile-menu.js">
+</head>
+<body>
+  <!-- App Container -->
+  <div id="app" class="min-h-screen bg-gray-50">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+      <div class="text-center">
+        <div class="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg mx-auto mb-4 animate-pulse"></div>
+        <p class="text-gray-600">Loading Dashboard...</p>
+      </div>
+    </div>
+    
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+      <!-- Main Content Area -->
+    <main id="mainContent" class="transition-all duration-300">
+      <!-- Page content will be loaded here -->
+    </main>
+      <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+      <!-- Modals Container -->
+    <div id="modalsContainer"></div>
+  </div> <!-- End of app container -->
+    
+    <script>
+    // Initialize utils with a reference to the app
+    document.addEventListener('DOMContentLoaded', () => {
+      // Make important objects available globally
+      window.utils = {
+        formatDate: window.formatDate || function(){},
+        formatCurrency: window.formatCurrency || function(){},
+        validateEmail: window.validateEmail || function(){},
+        generateId: window.generateId || function(){},
+        showToast: window.showToast || function(){}      };
+      window.dataManager = new DataManager();
+      
+      // Initialize cloud storage if available
+      if (typeof GoogleDriveStorageManager !== 'undefined') {
+        window.cloudStorage = new GoogleDriveStorageManager();
+      }
+    });
+  </script>
+
+  <!-- Component Scripts -->
+  <script src="components/navigation.js"></script>
+  <script src="components/mobile-menu.js"></script>  <!-- Initialize App -->
+  <script>
+    // Initialize the application after DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize the app
+      App.init();
+    });
+      // Register service worker for offline functionality
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+  </script>
+</body>
+</html>

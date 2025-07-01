@@ -1,0 +1,92 @@
+/* CSS Polyfills and Browser Compatibility Fixes */
+
+/* Polyfill for 'size' CSS property */
+.size-full {
+  width: 100%;
+  height: 100%;
+}
+
+.size-10 {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.size-12 {
+  width: 3rem;
+  height: 3rem;
+}
+
+.size-8 {
+  width: 2rem;
+  height: 2rem;
+}
+
+.size-16 {
+  width: 4rem;
+  height: 4rem;
+}
+
+.size-32 {
+  width: 8rem;
+  height: 8rem;
+}
+
+/* Container query polyfill fallbacks */
+@media (max-width: 640px) {
+  .table-column-120, .table-column-240, .table-column-360 {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-column-480, .table-column-600 {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .table-column-720, .table-column-840 {
+    display: none !important;
+  }
+}
+
+/* Fix for browsers that don't support modern CSS features */
+.bg-gradient-to-r {
+  background: linear-gradient(to right, var(--gradient-start, #3b82f6), var(--gradient-end, #8b5cf6));
+}
+
+/* Add general fallbacks for flex layouts */
+.flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.items-center {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.justify-center {
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Ensure proper spacing on all browsers */
+.p-4 {
+  padding: 1rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}

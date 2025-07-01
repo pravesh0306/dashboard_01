@@ -1,0 +1,101 @@
+/* Color Contrast Fixes for Fashion Admin Dashboard */
+
+/* Fix left panel contrast issues */
+.sidebar {
+  background-color: #ffffff;
+  color: #111518;
+}
+
+.sidebar .nav-item {
+  color: #333333;
+}
+
+.sidebar .nav-item:hover {
+  background-color: #e6f0fb;
+  color: #0066cc;
+}
+
+.sidebar .nav-item.active {
+  background-color: #e6f0fb;
+  color: #0066cc;
+  font-weight: 600;
+}
+
+/* Fix contrast in status cards */
+.stat-card {
+  color: #333333;
+}
+
+.stat-label {
+  color: #555555;
+}
+
+/* Fix calendar contrast issues */
+.calendar-grid .day {
+  color: #333333;
+}
+
+.calendar-grid .day.inactive {
+  color: #999999;
+}
+
+/* Fix table contrast issues */
+table th {
+  color: #333333;
+  background-color: #f6f8fa;
+}
+
+table td {
+  color: #333333;
+}
+
+/* Fix modal contrast issues */
+.modal-content {
+  color: #333333;
+  background-color: #ffffff;
+}
+
+/* Fix form field contrast */
+input, select, textarea {
+  color: #333333;
+  background-color: #ffffff;
+  border: 1px solid #dbe0e6;
+}
+
+/* Fix button contrast */
+.btn {
+  color: #ffffff;
+  background-color: #0066cc;
+}
+
+.btn-secondary {
+  color: #333333;
+  background-color: #f0f2f5;
+}
+
+.btn-danger {
+  color: #ffffff;
+  background-color: #ef4444;
+}
+
+/* Fix mobile menu contrast */
+.mobile-nav {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+/* Ensure all icons have proper contrast */
+svg {
+  fill: currentColor;
+}
+
+/* Fix panel header contrast */
+.panel-header {
+  color: #333333;
+}
+
+/* Ensure active items are clearly visible */
+.active {
+  color: #0066cc;
+  font-weight: 500;
+}

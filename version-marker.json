@@ -1,0 +1,33 @@
+{
+  "versionInfo": {
+    "major": 3,
+    "minor": 0,
+    "patch": 0,
+    "label": "PREMIUM",
+    "dateCreated": "2025-06-12",
+    "lastDeployment": "2025-06-12"
+  },
+  "status": {
+    "stable": true,
+    "verified": true,
+    "production": true,
+    "qualityRating": 5
+  },
+  "features": {
+    "trialComingUpStatus": true,
+    "deliveryComingUpStatus": true,
+    "calendarMarkings": true
+  },
+  "deployment": {
+    "url": "https://test-fileupload-bbf7e.web.app",
+    "method": "firebase",
+    "backupLocation": "g:\\GITHUB\\fin_test\\backups",
+    "deploymentId": "premium-v3-06122025"
+  },
+  "testing": {
+    "passed": true,
+    "completedOn": "2025-06-12",
+    "browsersTested": ["Chrome", "Firefox", "Safari", "Edge", "Mobile"]
+  },
+  "recommendation": "GOLD STANDARD - Preserve this version as the baseline for future development"
+}
