@@ -32,9 +32,11 @@
   
   <!-- Extension Conflict Handler to prevent browser extension errors from affecting the app -->
   <script src="extension-conflict-handler.js"></script>
+  <!-- Google Drive Integration -->
+  <script src="google-drive-storage.js"></script>
   <script>
-    // Local dashboard - no authentication needed
-    console.log('🚀 Loading Local Fashion Dashboard');
+    // Combined dashboard with login overlay
+    console.log('🚀 Loading Fashion Dashboard with Login Integration');
     
     // Performance monitoring
     const perfStart = performance.now();
@@ -46,14 +48,125 @@
     });
   </script>
   </script>
-  <!-- Local Dashboard Configuration -->
+  <!-- Login/Dashboard Integration -->
   <script>
-    // Simplified local storage manager for local development
-    const cloudStorage = null; // Disabled for local use
-    console.log('📁 Local dashboard - cloud storage disabled');
+    // Global variables for login state
+    let isAuthenticated = false;
+    let cloudStorage = null;
+    let userProfile = null;
     
-    // Initialize app without authentication
-    console.log('🚀 Fashion Dashboard ready for local use');
+    // Initialize cloud storage manager
+    async function initializeCloudStorage() {
+      try {
+        cloudStorage = new GoogleDriveStorageManager();
+        await cloudStorage.initialize();
+        console.log('📁 Google Drive storage ready');
+        return true;
+      } catch (error) {
+        console.error('Failed to initialize cloud storage:', error);
+        return false;
+      }
+    }
+    
+    // Check authentication status and show/hide login overlay
+    async function checkAuthStatus() {
+      try {
+        if (cloudStorage) {
+          const authenticated = await cloudStorage.authenticate();
+          if (authenticated) {
+            userProfile = await cloudStorage.getUserProfile();
+            isAuthenticated = true;
+            hideLoginOverlay();
+            console.log('✅ User authenticated:', userProfile.name);
+            return true;
+          }
+        }
+      } catch (error) {
+        console.log('No authentication, showing login overlay');
+      }
+      
+      showLoginOverlay();
+      return false;
+    }
+    
+    // Show login overlay
+    function showLoginOverlay() {
+      const overlay = document.getElementById('loginOverlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+    }
+    
+    // Hide login overlay and show dashboard
+    function hideLoginOverlay() {
+      const overlay = document.getElementById('loginOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    }
+    
+    // Handle Google Sign In
+    async function handleGoogleSignIn() {
+      try {
+        const signInBtn = document.getElementById('googleSignInBtn');
+        if (signInBtn) {
+          signInBtn.innerHTML = '<span class="spinner"></span> Signing in...';
+          signInBtn.disabled = true;
+        }
+        
+        if (!cloudStorage) {
+          await initializeCloudStorage();
+        }
+        
+        const authenticated = await cloudStorage.authenticate();
+        if (authenticated) {
+          userProfile = await cloudStorage.getUserProfile();
+          isAuthenticated = true;
+          hideLoginOverlay();
+          console.log('✅ Login successful:', userProfile.name);
+          
+          // Load data from Google Drive
+          await loadDataFromCloud();
+        }
+      } catch (error) {
+        console.error('Login failed:', error);
+        alert('Login failed. Please try again.');
+      } finally {
+        const signInBtn = document.getElementById('googleSignInBtn');
+        if (signInBtn) {
+          signInBtn.innerHTML = '🔐 Sign in with Google';
+          signInBtn.disabled = false;
+        }
+      }
+    }
+    
+    // Handle local use (skip login)
+    function useLocally() {
+      isAuthenticated = false;
+      cloudStorage = null;
+      hideLoginOverlay();
+      console.log('� Using locally without cloud sync');
+    }
+    
+    // Load data from Google Drive if authenticated
+    async function loadDataFromCloud() {
+      if (!cloudStorage || !isAuthenticated) return;
+      
+      try {
+        // Try to load orders and customers from Google Drive
+        // This integrates with your existing loadData() function
+        console.log('📥 Loading data from Google Drive...');
+        // Implementation would go here to replace localStorage calls
+      } catch (error) {
+        console.error('Failed to load data from cloud:', error);
+      }
+    }
+    
+    // Initialize app on page load
+    window.addEventListener('load', async () => {
+      await initializeCloudStorage();
+      await checkAuthStatus();
+    });
   </script>
   </script>
   <!-- Fix: Top Right Search/Filter Box -->
@@ -207,7 +320,66 @@
     }
   </style>
 </head>
-<body>  <!-- Login Page - DISABLED FOR LOCAL USE
+<body>
+  <!-- Login Overlay -->
+  <div id="loginOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(10px);" class="flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-r from-[#51946b] to-[#3d7354] rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Fashion Admin Dashboard</h1>
+        <p class="text-gray-600">Sign in to sync your data across devices</p>
+      </div>
+      
+      <!-- Sign In Button -->
+      <button id="googleSignInBtn" onclick="handleGoogleSignIn()" 
+              class="w-full bg-white border border-gray-300 rounded-lg px-6 py-3 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors mb-4 shadow-sm">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span class="font-medium text-gray-700">🔐 Sign in with Google</span>
+      </button>
+      
+      <!-- Skip Button -->
+      <button onclick="useLocally()" 
+              class="w-full bg-gray-100 border border-gray-200 rounded-lg px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors font-medium">
+        📱 Use Locally (No Sync)
+      </button>
+      
+      <!-- Info -->
+      <p class="text-xs text-gray-500 text-center mt-4">
+        Cloud sync stores your data in your personal Google Drive. Local use saves data in your browser only.
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading Spinner CSS -->
+  <style>
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #51946b;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <!-- Login Page - DISABLED FOR LOCAL USE
   <div id="loginPage" class="relative flex size-full min-h-screen flex-col bg-gradient-to-br from-indigo-50 via-white to-cyan-50 group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
     <!-- Background Pattern -->
     <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJkb3RzIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8Y2lyY2xlIGN4PSIxIiBjeT0iMSIgcj0iMSIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+CiAgICA8L3BhdHRlcm4+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0idXJsKCNkb3RzKSIvPgo8L3N2Zz4=')] opacity-30"></div>
