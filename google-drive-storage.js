@@ -3,7 +3,7 @@
 // Replace YOUR_GOOGLE_CLIENT_ID with your real client ID
 
 const GOOGLE_DRIVE_CONFIG = Object.freeze({ // Freeze the config object
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Google Client ID
+  CLIENT_ID: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com', // Fashion Admin Dashboard Client ID
   SCOPES: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
   FOLDER_ID: '', // Optional: set to a folder ID to upload into a specific folder
 });
