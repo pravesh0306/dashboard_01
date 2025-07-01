@@ -48,7 +48,7 @@ if (isDemoMode && (email === 'admin@varoinmarwah.com' || email.includes('demo'))
 **Issue**: Placeholder client ID  
 
 **Before**: `client_id: 'your-google-client-id'`  
-**After**: `client_id: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com'`
+**After**: `client_id: 'YOUR_GOOGLE_CLIENT_ID' // Replace with your actual Google Client ID`
 
 ---
 

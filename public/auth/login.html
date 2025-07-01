@@ -255,7 +255,7 @@
       initGoogleSignIn() {
         if (typeof google !== 'undefined' && google.accounts) {
           try {            google.accounts.id.initialize({
-              client_id: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com', // Replace with your actual Google Client ID
+              client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual Google Client ID
               callback: this.handleGoogleCallback.bind(this)
             });
 

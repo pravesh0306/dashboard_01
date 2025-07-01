@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 ### Google Drive Integration:
 ```javascript
 const GOOGLE_DRIVE_CONFIG = {
-  CLIENT_ID: '742085206847-n89sirj5uo2dsep5rlpo5h5ce125hkqk.apps.googleusercontent.com',
+  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual Google Client ID
   SCOPES: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email'
 };
 ```
