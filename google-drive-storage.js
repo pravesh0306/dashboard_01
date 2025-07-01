@@ -8,6 +8,9 @@ const GOOGLE_DRIVE_CONFIG = Object.freeze({ // Freeze the config object
   FOLDER_ID: '', // Optional: set to a folder ID to upload into a specific folder
 });
 
+// Make config globally accessible for validation
+window.GOOGLE_DRIVE_CONFIG = GOOGLE_DRIVE_CONFIG;
+
 class GoogleDriveStorageManager {
   constructor() {
     this.isReady = false;

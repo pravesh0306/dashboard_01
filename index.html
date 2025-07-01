@@ -113,8 +113,14 @@
           signInBtn.disabled = true;
         }
         
+        // Check if Google Client ID is configured
         if (!cloudStorage) {
           await initializeCloudStorage();
+        }
+        
+        // Check if the Client ID is still a placeholder
+        if (window.GOOGLE_DRIVE_CONFIG && window.GOOGLE_DRIVE_CONFIG.CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+          throw new Error('Google Client ID not configured. Please set up your Google Client ID for cloud sync or use locally.');
         }
         
         const authenticated = await cloudStorage.authenticate();
@@ -129,7 +135,16 @@
         }
       } catch (error) {
         console.error('Login failed:', error);
-        alert('Login failed. Please try again.');
+        
+        // Show user-friendly message based on error type
+        let message = 'Login failed. ';
+        if (error.message && error.message.includes('Client ID not configured')) {
+          message = 'Google Drive sync is not configured yet. You can:\n\n1. Use the "Use Locally" button below\n2. Or set up Google Client ID for cloud sync\n\nFor setup instructions, see the GOOGLE_DRIVE_INTEGRATION_GUIDE.md';
+        } else {
+          message += 'Please try again or use locally.';
+        }
+        
+        alert(message);
       } finally {
         const signInBtn = document.getElementById('googleSignInBtn');
         if (signInBtn) {
