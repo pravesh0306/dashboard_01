@@ -1,7 +1,7 @@
 {
   "projects": {
     "default": "test-fileupload-bbf7e",
-    "y": "test-fileupload-bbf7e"
+    "production": "test-fileupload-bbf7e"
   },
   "targets": {},
   "etags": {}
