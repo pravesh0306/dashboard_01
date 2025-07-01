@@ -167,7 +167,7 @@
         // Show user-friendly message based on error type
         let message = 'Login failed. ';
         if (error.message && error.message.includes('Client ID not configured')) {
-          message = 'Google Drive sync is not configured yet. You can use the "Use Locally" button below or set up Google Client ID for cloud sync. For setup instructions, see the GOOGLE_DRIVE_INTEGRATION_GUIDE.md';
+          message = 'Google Drive sync is not configured yet. You can use the "Use Locally" button below or set up Google Client ID for cloud sync. For setup instructions, see the documentation.';
         } else {
           message += 'Please try again or use locally.';
         }
