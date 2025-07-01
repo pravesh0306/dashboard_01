@@ -97,9 +97,16 @@ class GoogleDriveStorageManager {
     });
   }
   initializeTokenClient() {
+    // Check if CLIENT_ID is properly configured before initializing
+    if (GOOGLE_DRIVE_CONFIG.CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID' || !GOOGLE_DRIVE_CONFIG.CLIENT_ID) {
+      console.warn('Google Client ID not configured - OAuth client initialization skipped');
+      return;
+    }
+    
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_DRIVE_CONFIG.CLIENT_ID,
-      scope: GOOGLE_DRIVE_CONFIG.SCOPES,      callback: (response) => {
+      scope: GOOGLE_DRIVE_CONFIG.SCOPES,
+      callback: (response) => {
         // This callback is invoked when a token is issued or an error occurs
         if (response && response.access_token) {
           console.log('Token received/refreshed:', response);
@@ -128,6 +135,16 @@ class GoogleDriveStorageManager {
   }  async authenticate() {
     await this.initialize(); // Ensure GIS is loaded and tokenClient is initialized
 
+    // Check if CLIENT_ID is properly configured
+    if (GOOGLE_DRIVE_CONFIG.CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID' || !GOOGLE_DRIVE_CONFIG.CLIENT_ID) {
+      throw new Error('Google Client ID not configured. Please set up your Google Client ID for cloud sync or use locally.');
+    }
+
+    // Check if tokenClient was successfully initialized
+    if (!this.tokenClient) {
+      throw new Error('Google OAuth client not initialized. Please check your configuration.');
+    }
+
     if (this.accessToken && Date.now() < this.tokenExpiresAt) {
       console.log('Using existing valid token.');
       return true;
@@ -144,10 +161,12 @@ class GoogleDriveStorageManager {
       this.authPromiseResolvers = { resolve, reject };
 
       // Check if scopes have already been granted to avoid unnecessary consent prompt
-      if (google.accounts.oauth2.hasGrantedAllScopes(this.tokenClient, GOOGLE_DRIVE_CONFIG.SCOPES)) {
+      if (this.tokenClient && google.accounts.oauth2.hasGrantedAllScopes(this.tokenClient, GOOGLE_DRIVE_CONFIG.SCOPES)) {
         this.tokenClient.requestAccessToken({}); // Request token without prompt if already granted
-      } else {
+      } else if (this.tokenClient) {
         this.tokenClient.requestAccessToken({ prompt: 'consent' }); // Prompt for consent if not granted
+      } else {
+        reject(new Error('OAuth client not initialized'));
       }
     }).finally(() => {
       this.currentAuthPromise = null; // Clear the promise once it's settled
@@ -273,6 +292,10 @@ class GoogleDriveStorageManager {
   }
 
   isAuthenticated() {
+    // Return false if CLIENT_ID is not configured
+    if (GOOGLE_DRIVE_CONFIG.CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID' || !GOOGLE_DRIVE_CONFIG.CLIENT_ID) {
+      return false;
+    }
     return this.accessToken && Date.now() < this.tokenExpiresAt;
   }  logout() {
     const token = this.accessToken;
