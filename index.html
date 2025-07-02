@@ -81,7 +81,8 @@
             userProfile = await window.cloudStorage.getUserProfile();
             isAuthenticated = true;
             hideLoginOverlay();
-            console.log('✅ User authenticated:', userProfile.name);
+            console.log('✅ User authenticated:', userProfile?.name || userProfile?.email || 'Unknown user');
+            console.log('📋 Full user profile:', userProfile);
             return true;
           }
         }
@@ -206,6 +207,34 @@
       }
     }
     
+    // Cloud data saving functionality
+async function saveDataToCloud() {
+  if (!window.cloudStorage || !isAuthenticated) {
+    console.log('🔒 Not authenticated, skipping cloud save');
+    return;
+  }
+  
+  try {
+    // Create data backup files for Google Drive
+    const ordersData = JSON.stringify(orders, null, 2);
+    const customersData = JSON.stringify(customers, null, 2);
+    
+    // Create blob files for upload
+    const ordersBlob = new Blob([ordersData], { type: 'application/json' });
+    const customersBlob = new Blob([customersData], { type: 'application/json' });
+    
+    // Upload to Google Drive with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    
+    await window.cloudStorage.uploadFile(ordersBlob, `fashion-dashboard-orders-${timestamp}.json`);
+    await window.cloudStorage.uploadFile(customersBlob, `fashion-dashboard-customers-${timestamp}.json`);
+    
+    console.log('☁️ Data backed up to Google Drive');
+  } catch (error) {
+    console.error('Failed to save data to cloud:', error);
+  }
+}
+
     // Initialize app on page load
     window.addEventListener('load', async () => {
       await initializeCloudStorage();
@@ -927,8 +956,16 @@
   <script>
     // --- Data Models with Persistence ---
 function saveData() {
+  // Always save to localStorage first
   localStorage.setItem('orders', JSON.stringify(orders));
   localStorage.setItem('customers', JSON.stringify(customers));
+  
+  // Also save to Google Drive if authenticated
+  if (isAuthenticated && window.cloudStorage) {
+    saveDataToCloud();
+  }
+  
+  console.log('📁 Data saved:', { orders: orders.length, customers: customers.length });
 }
 function loadData() {
   const o = localStorage.getItem('orders');
@@ -1380,154 +1417,23 @@ document.getElementById('createOrderForm').onsubmit = async function(e) {
   showPage('orders');
   
   console.log('Order creation completed successfully!');
-};    // --- File Preview Handlers ---
-// Handle fabric attachment file preview
-document.getElementById('fabricAttachment').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  const preview = document.getElementById('fabricPreview');
-  
-  if (file) {
-    preview.innerHTML = `
-      <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg cursor-pointer" onclick="previewSingleFile(this, 'fabric')">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">${file.type.startsWith('image/') ? '🖼️' : '📄'}</span>
-          <span class="text-sm font-medium">${file.name}</span>
-          <span class="text-xs text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
-        </div>
-        <span class="text-xs text-blue-600">Click to preview</span>
-      </div>
-    `;
-    preview.classList.remove('hidden');
-  } else {
-    preview.classList.add('hidden');
-  }
-});
+};    // Debug function to check data
+function debugDataStatus() {
+  console.log('🔍 Data Status Check:');
+  console.log('📋 Orders in memory:', orders.length);
+  console.log('👥 Customers in memory:', customers.length);
+  console.log('💾 Orders in localStorage:', localStorage.getItem('orders') ? JSON.parse(localStorage.getItem('orders')).length : 0);
+  console.log('💾 Customers in localStorage:', localStorage.getItem('customers') ? JSON.parse(localStorage.getItem('customers')).length : 0);
+  console.log('🔐 Authenticated:', isAuthenticated);
+  console.log('☁️ Cloud storage ready:', !!window.cloudStorage);
+}
 
-// Handle style attachment file preview
-document.getElementById('styleAttachment').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  const preview = document.getElementById('stylePreview');
-  
-  if (file) {
-    preview.innerHTML = `
-      <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg cursor-pointer" onclick="previewSingleFile(this, 'style')">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">${file.type.startsWith('image/') ? '🖼️' : '📄'}</span>
-          <span class="text-sm font-medium">${file.name}</span>
-          <span class="text-xs text-gray-500">(${(file.size / 1024).toFixed(1)} KB)</span>
-        </div>
-        <span class="text-xs text-blue-600">Click to preview</span>
-      </div>
-    `;
-    preview.classList.remove('hidden');
-  } else {
-    preview.classList.add('hidden');
-  }
-});
+// Make debug function globally available
+window.debugDataStatus = debugDataStatus;
 
-// Function to preview single files (fabric/style)
-window.previewSingleFile = function(element, type) {
-  const fileInput = type === 'fabric' ? 
-    document.getElementById('fabricAttachment') : 
-    document.getElementById('styleAttachment');
-  
-  const file = fileInput.files[0];
-  if (file) {
-    currentPreviewFile = file;
-    showFilePreview(file);
-  }
-};
-
-// --- Page switching logic ---
-console.log('Tab switching script loaded');
-// Removed authentication-related elements since this is a local dashboard
-const appContainer = document.getElementById('appContainer');
-const navItems = document.querySelectorAll('.nav-item');
-const pageSections = {
-  dashboard: document.getElementById('dashboardPage'),
-  orders: document.getElementById('ordersPage'),
-  customers: document.getElementById('customersPage'),
-  createOrder: document.getElementById('createOrderPage'),
-  settings: document.getElementById('settingsPage')
-};
-// Add debug log for navItems and pageSections
-console.log('navItems:', navItems);
-console.log('pageSections:', pageSections);
-navItems.forEach(item => {
-  item.addEventListener('click', (e) => {
-    e.preventDefault();
-    navItems.forEach(i => i.classList.remove('text-[#51946b]', 'font-bold'));
-    item.classList.add('text-[#51946b]', 'font-bold');
-    Object.keys(pageSections).forEach(key => {
-      if (pageSections[key]) pageSections[key].style.display = 'none';
-    });
-    const targetPage = item.dataset.page;
-    if (pageSections[targetPage]) {
-      pageSections[targetPage].style.display = '';
-      console.log('Switched to page:', targetPage);
-    } else {
-      console.warn('No section found for page:', targetPage);
-    }
-  });
-});
-// Show dashboard by default
-if (pageSections.dashboard) pageSections.dashboard.style.display = '';
-
-    // === CRITICAL: Force Button Visibility ===
-    // Ensure all buttons are visible when page loads
-    function ensureButtonVisibility() {
-      console.log('🔧 Ensuring button visibility...');
-      
-      const buttonIds = [
-        'printDashboardBtn',
-        'printOrdersBtn', 
-        'exportOrdersBtn',
-        'createOrderNavBtnFromOrdersPage',
-        'printCreateOrderBtn'
-      ];
-      
-      buttonIds.forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) {
-          btn.style.visibility = 'visible';
-          btn.style.opacity = '1';
-          btn.style.display = 'flex';
-          btn.style.zIndex = '1000';
-          console.log(`✅ Button ${id} visibility ensured`);
-        } else {
-          console.warn(`⚠️ Button ${id} not found`);
-        }
-      });
-      
-      // Also apply to any buttons with these classes
-      const buttonClasses = ['export-button', 'print-button', 'create-button'];
-      buttonClasses.forEach(className => {
-        const buttons = document.querySelectorAll(`.${className}`);
-        buttons.forEach(btn => {
-          btn.style.visibility = 'visible';
-          btn.style.opacity = '1';
-          btn.style.display = 'flex';
-          btn.style.zIndex = '1000';
-        });
-        console.log(`✅ ${buttons.length} buttons with class ${className} visibility ensured`);
-      });
-    }
-    
-    // Run on DOM content loaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', ensureButtonVisibility);
-    } else {
-      ensureButtonVisibility();
-    }
-    
-    // Also run after a brief delay to catch any dynamic buttons
-    setTimeout(ensureButtonVisibility, 100);
-    setTimeout(ensureButtonVisibility, 500);
-
-    // === EXISTING BUTTON EVENT HANDLERS ===
+// Loading spinner CSS
   </script>
   <script>
-  document.addEventListener('DOMContentLoaded', function () {
     // Tab navigation for sidebar and mobile nav
     const pages = {
       dashboard: document.getElementById('dashboardPage'),
@@ -1751,6 +1657,16 @@ if (pageSections.dashboard) pageSections.dashboard.style.display = '';
                 <p class="text-xs text-[#6a7681]">${fileSize} MB • ${file.type || 'Unknown type'}</p>
               </div>
             </div>
+            <div class="flex-shrink-0">
+              <button onclick="removeFile(${index})" class="text-[#dc3545] hover:text-[#c82333] text-xs font-medium">
+                🗑️ Remove
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
     function getFileIcon(mimeType) {
       if (mimeType.startsWith('image/')) return '🖼️';
       if (mimeType.includes('pdf')) return '📄';
@@ -2312,7 +2228,6 @@ if (pageSections.dashboard) pageSections.dashboard.style.display = '';
     }
     
     // --- End Excel Export Functionality ---
-  });
-</script>
+  </script>
 </body>
 </html>
