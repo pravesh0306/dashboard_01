@@ -53,6 +53,10 @@
     let isAuthenticated = false;
     let userProfile = null;
     
+    // Global variables for data storage
+    let orders = [];
+    let customers = [];
+    
     // Initialize cloud storage manager
     async function initializeCloudStorage() {
       try {
@@ -237,6 +241,7 @@ async function saveDataToCloud() {
 
     // Initialize app on page load
     window.addEventListener('load', async () => {
+      loadData(); // Load data first
       await initializeCloudStorage();
       await checkAuthStatus();
     });
