@@ -230,6 +230,8 @@ async function saveDataToCloud() {
   }
   
   try {
+    showStatusMessage('Syncing to Google Drive...', 'info');
+    
     // Create data backup files for Google Drive
     const ordersData = JSON.stringify(orders, null, 2);
     const customersData = JSON.stringify(customers, null, 2);
@@ -245,8 +247,10 @@ async function saveDataToCloud() {
     await window.cloudStorage.uploadFile(customersBlob, `fashion-dashboard-customers-${timestamp}.json`);
     
     console.log('☁️ Data backed up to Google Drive');
+    showStatusMessage('✅ Data synced to Google Drive successfully', 'success');
   } catch (error) {
     console.error('Failed to save data to cloud:', error);
+    showStatusMessage('❌ Failed to sync to Google Drive: ' + error.message, 'error');
   }
 }
 
@@ -483,6 +487,145 @@ async function saveDataToCloud() {
 
     .notification.info {
       background-color: #3b82f6;
+    }
+
+    /* Status Bar Styles */
+    .status-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 9999;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    .status-bar.show {
+      transform: translateY(0);
+    }
+
+    .status-bar.success {
+      background-color: #10b981;
+    }
+
+    .status-bar.error {
+      background-color: #ef4444;
+    }
+
+    .status-bar.info {
+      background-color: #3b82f6;
+    }
+
+    /* Progress Bar Styles */
+    .progress-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 10001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      min-width: 300px;
+      max-width: 400px;
+    }
+
+    .progress-container.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .progress-content {
+      padding: 24px;
+    }
+
+    .progress-message {
+      font-size: 16px;
+      font-weight: 500;
+      color: #111518;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #51946b 0%, #3d7354 100%);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-percentage {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    /* Loading States */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: inherit;
+    }
+
+    /* Utility Buttons */
+    .utility-button {
+      background-color: #f3f4f6 !important;
+      color: #374151 !important;
+      border: 1px solid #d1d5db !important;
+      min-width: 80px !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 8px 12px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      transition: all 0.2s !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      z-index: 1000 !important;
+    }
+
+    .utility-button:hover {
+      background-color: #e5e7eb !important;
+      border-color: #9ca3af !important;
+      transform: translateY(-1px);
     }
   </style>
 </head>
@@ -730,9 +873,17 @@ async function saveDataToCloud() {
           <section id="dashboardPage" class="page-section">
             <div class="flex flex-wrap justify-between gap-3 p-4">
               <p class="text-[#0e1a13] tracking-light text-[32px] font-bold leading-tight min-w-72">Dashboard</p>
-              <button id="printDashboardBtn" class="print-button" style="background-color: #6f42c1 !important; color: white !important; border: 1px solid #6f42c1 !important; min-width: 100px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
-                <span style="margin-right: 4px;">🖨️</span> Print PDF
-              </button>
+              <div class="flex gap-2">
+                <button onclick="refreshData()" class="utility-button" title="Refresh all data">
+                  <span style="margin-right: 4px;">🔄</span> Refresh
+                </button>
+                <button onclick="clearAppCache()" class="utility-button" title="Clear cache and reload">
+                  <span style="margin-right: 4px;">🧹</span> Clear Cache
+                </button>
+                <button id="printDashboardBtn" class="print-button" style="background-color: #6f42c1 !important; color: white !important; border: 1px solid #6f42c1 !important; min-width: 100px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 8px 16px !important; border-radius: 12px !important; font-size: 14px !important; font-weight: bold !important; transition: all 0.2s !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; visibility: visible !important; opacity: 1 !important; z-index: 1000 !important;">
+                  <span style="margin-right: 4px;">🖨️</span> Print PDF
+                </button>
+              </div>
             </div>            <div class="flex flex-wrap gap-4 p-4">
               <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 border border-[#d1e6d9] bg-white">
                 <p class="text-[#0e1a13] text-base font-medium leading-normal">Total Orders</p>
@@ -1054,20 +1205,34 @@ async function saveDataToCloud() {
   <script>
     // --- Data Models with Persistence ---
 function saveData() {
-  // Always save to localStorage first
-  localStorage.setItem('orders', JSON.stringify(orders));
-  localStorage.setItem('customers', JSON.stringify(customers));
+  // Show saving indicator
+  showStatusMessage('Saving data...', 'info');
   
-  // Also save to Google Drive if authenticated
-  if (isAuthenticated && window.cloudStorage) {
-    saveDataToCloud();
+  try {
+    // Always save to localStorage first
+    localStorage.setItem('orders', JSON.stringify(orders));
+    localStorage.setItem('customers', JSON.stringify(customers));
+    
+    // Also save to Google Drive if authenticated
+    if (isAuthenticated && window.cloudStorage) {
+      saveDataToCloud();
+    }
+    
+    console.log('📁 Data saved:', { orders: orders.length, customers: customers.length });
+    showStatusMessage(`✅ Data saved successfully (${orders.length} orders, ${customers.length} customers)`, 'success');
+  } catch (error) {
+    console.error('Save error:', error);
+    showStatusMessage('❌ Error saving data: ' + error.message, 'error');
   }
-  
-  console.log('📁 Data saved:', { orders: orders.length, customers: customers.length });
 }
 function loadData() {
-  const o = localStorage.getItem('orders');
-  const c = localStorage.getItem('customers');  orders = o ? JSON.parse(o) : [
+  showStatusMessage('Loading data...', 'info');
+  
+  try {
+    const o = localStorage.getItem('orders');
+    const c = localStorage.getItem('customers');
+    
+    const hasLocalData = o || c;  orders = o ? JSON.parse(o) : [
     {
       id: 1,
       customer: 'Sarah Johnson',
@@ -1166,6 +1331,19 @@ function loadData() {
       orders: 1
     }
   ];
+  
+  if (hasLocalData) {
+    showStatusMessage(`✅ Data loaded from cache (${orders.length} orders, ${customers.length} customers)`, 'success');
+  } else {
+    showStatusMessage(`✅ Sample data loaded (${orders.length} orders, ${customers.length} customers)`, 'info');
+  }
+} catch (error) {
+  console.error('Load error:', error);
+  showStatusMessage('❌ Error loading data: ' + error.message, 'error');
+  // Fallback to empty arrays
+  orders = [];
+  customers = [];
+}
 }
 
 // --- Dashboard Rendering ---
@@ -1405,11 +1583,19 @@ document.getElementById('createOrderForm').onsubmit = async function(e) {
   e.preventDefault();
   const form = e.target;
 
+  // Show processing status
+  showStatusMessage('Processing order...', 'info');
+  
+  // Add loading state to form
+  form.classList.add('loading');
+  
   console.log('Form submitted!'); // Debug log
   
   // Check if we're editing an existing order
   const editingOrderId = form.dataset.editingOrderId;
   const isEditing = editingOrderId && editingOrderId !== '';
+  
+  try {
   
   // Handle file uploads locally (without cloud storage)
   let uploadedFileDetails = [];
@@ -1555,6 +1741,14 @@ document.getElementById('createOrderForm').onsubmit = async function(e) {
   showPage('orders');
   
   console.log('Order creation completed successfully!');
+  
+  } catch (error) {
+    console.error('Form submission error:', error);
+    showStatusMessage('❌ Error processing order: ' + error.message, 'error');
+  } finally {
+    // Remove loading state from form
+    form.classList.remove('loading');
+  }
 };    // Debug function to check data
 function debugDataStatus() {
   console.log('🔍 Data Status Check:');
@@ -2444,19 +2638,22 @@ window.debugDataStatus = debugDataStatus;
         return;
       }
 
-      // For local usage, create a blob URL
-      const attachment = {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: URL.createObjectURL(file),
-        uploadDate: new Date().toISOString()
-      };
+      // Show upload progress
+      simulateFileUpload(file, () => {
+        // For local usage, create a blob URL
+        const attachment = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: URL.createObjectURL(file),
+          uploadDate: new Date().toISOString()
+        };
 
-      order.techpackAttachment = attachment;
-      saveData();
-      updateRecentOrders();
-      showNotification('TechPack uploaded successfully', 'success');
+        order.techpackAttachment = attachment;
+        saveData();
+        updateRecentOrders();
+        showNotification('TechPack uploaded successfully', 'success');
+      });
     }
 
     // --- Utility Functions ---
@@ -2478,6 +2675,178 @@ window.debugDataStatus = debugDataStatus;
         notification.classList.remove('show');
       }, 3000);
     }
+
+    // Status message function (alias for showNotification with persistent display)
+    function showStatusMessage(message, type = 'info') {
+      // Create or update status bar
+      let statusBar = document.getElementById('statusBar');
+      if (!statusBar) {
+        statusBar = document.createElement('div');
+        statusBar.id = 'statusBar';
+        statusBar.className = 'status-bar';
+        document.body.appendChild(statusBar);
+      }
+      
+      statusBar.textContent = message;
+      statusBar.className = `status-bar ${type} show`;
+      
+      // For success/error messages, auto-hide after 3 seconds
+      if (type === 'success' || type === 'error') {
+        setTimeout(() => {
+          statusBar.classList.remove('show');
+        }, 3000);
+      }
+      // Info messages stay visible longer (5 seconds)
+      else if (type === 'info') {
+        setTimeout(() => {
+          statusBar.classList.remove('show');
+        }, 5000);
+      }
+    }
+
+    // Progress bar functions
+    function showProgressBar(message = 'Processing...') {
+      let progressContainer = document.getElementById('progressContainer');
+      if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.id = 'progressContainer';
+        progressContainer.className = 'progress-container';
+        progressContainer.innerHTML = `
+          <div class="progress-content">
+            <div class="progress-message">${message}</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-percentage" id="progressPercentage">0%</div>
+          </div>
+        `;
+        document.body.appendChild(progressContainer);
+      }
+      
+      progressContainer.querySelector('.progress-message').textContent = message;
+      progressContainer.classList.add('show');
+      return progressContainer;
+    }
+
+    function updateProgressBar(percentage, message = null) {
+      const progressFill = document.getElementById('progressFill');
+      const progressPercentage = document.getElementById('progressPercentage');
+      const progressMessage = document.querySelector('.progress-message');
+      
+      if (progressFill) {
+        progressFill.style.width = `${percentage}%`;
+      }
+      if (progressPercentage) {
+        progressPercentage.textContent = `${percentage}%`;
+      }
+      if (message && progressMessage) {
+        progressMessage.textContent = message;
+      }
+    }
+
+    function hideProgressBar() {
+      const progressContainer = document.getElementById('progressContainer');
+      if (progressContainer) {
+        progressContainer.classList.remove('show');
+        setTimeout(() => {
+          if (progressContainer.parentNode) {
+            progressContainer.parentNode.removeChild(progressContainer);
+          }
+        }, 300);
+      }
+    }
+
+    // File upload progress simulation
+    function simulateFileUpload(file, callback) {
+      const progressContainer = showProgressBar(`Uploading ${file.name}...`);
+      let progress = 0;
+      
+      const interval = setInterval(() => {
+        progress += Math.random() * 15 + 5; // Random progress between 5-20%
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          updateProgressBar(100, `Upload complete: ${file.name}`);
+          setTimeout(() => {
+            hideProgressBar();
+            if (callback) callback();
+          }, 1000);
+        } else {
+          updateProgressBar(Math.floor(progress), `Uploading ${file.name}...`);
+        }
+      }, 200);
+    }
+
+    // Cache management functions
+    function checkForUpdates() {
+      const currentVersion = '2.1.0'; // Update this when making changes
+      const lastVersion = localStorage.getItem('appVersion');
+      
+      if (lastVersion !== currentVersion) {
+        showStatusMessage('🔄 App updated! Refreshing cache...', 'info');
+        localStorage.setItem('appVersion', currentVersion);
+        
+        // Clear any cached resources if needed
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              caches.delete(name);
+            });
+          });
+        }
+        
+        setTimeout(() => {
+          showStatusMessage('✅ App updated successfully!', 'success');
+        }, 2000);
+      }
+    }
+
+    function clearAppCache() {
+      if (confirm('This will clear all cached data and refresh the app. Continue?')) {
+        showStatusMessage('🧹 Clearing cache...', 'info');
+        
+        // Clear localStorage except user preferences
+        const authData = localStorage.getItem('authData');
+        const userProfile = localStorage.getItem('userProfile');
+        localStorage.clear();
+        if (authData) localStorage.setItem('authData', authData);
+        if (userProfile) localStorage.setItem('userProfile', userProfile);
+        
+        // Clear browser cache
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              caches.delete(name);
+            });
+          });
+        }
+        
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 1000);
+      }
+    }
+
+    // Add refresh data function
+    function refreshData() {
+      showStatusMessage('🔄 Refreshing data...', 'info');
+      
+      try {
+        loadData();
+        renderDashboard();
+        renderOrders();
+        renderCustomers();
+        
+        showStatusMessage('✅ Data refreshed successfully', 'success');
+      } catch (error) {
+        showStatusMessage('❌ Error refreshing data: ' + error.message, 'error');
+      }
+    }
+
+    // Initialize app version check on load
+    document.addEventListener('DOMContentLoaded', function() {
+      checkForUpdates();
+    });
     
     // --- End Additional Functions ---
   </script>
