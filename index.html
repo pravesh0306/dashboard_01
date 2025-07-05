@@ -97,18 +97,109 @@
           if (authenticated) {
             userProfile = await window.cloudStorage.getUserProfile();
             isAuthenticated = true;
-            hideLoginOverlay();
+            updateUIForAuthenticatedUser();
             console.log('✅ User authenticated:', userProfile?.name || userProfile?.email || 'Unknown user');
             console.log('📋 Full user profile:', userProfile);
-            return true;
+          } else {
+            updateUIForUnauthenticatedUser();
+            console.log('❌ User not authenticated');
           }
+        } else {
+          updateUIForUnauthenticatedUser();
+          console.log('⚠️ Cloud storage not available');
         }
       } catch (error) {
-        console.log('No authentication, showing login overlay');
+        updateUIForUnauthenticatedUser();
+        console.error('Authentication check failed:', error);
       }
-      
-      showLoginOverlay();
-      return false;
+    }
+
+    // Update UI for authenticated user
+    function updateUIForAuthenticatedUser() {
+      const loginButton = document.getElementById('loginButton');
+      const userInfo = document.getElementById('userInfo');
+      const userName = document.getElementById('userName');
+      const userAvatar = document.getElementById('userAvatar');
+
+      if (loginButton) loginButton.classList.add('hidden');
+      if (userInfo) userInfo.classList.remove('hidden');
+      if (userName && userProfile) {
+        userName.textContent = userProfile.name || userProfile.email || 'User';
+      }
+      if (userAvatar && userProfile) {
+        const name = userProfile.name || userProfile.email || 'User';
+        userAvatar.style.backgroundImage = `url("https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=51946b&color=fff")`;
+      }
+    }
+
+    // Update UI for unauthenticated user
+    function updateUIForUnauthenticatedUser() {
+      const loginButton = document.getElementById('loginButton');
+      const userInfo = document.getElementById('userInfo');
+      const userAvatar = document.getElementById('userAvatar');
+
+      if (loginButton) loginButton.classList.remove('hidden');
+      if (userInfo) userInfo.classList.add('hidden');
+      if (userAvatar) {
+        userAvatar.style.backgroundImage = `url("https://ui-avatars.com/api/?name=Admin&background=e8f2ec&color=0e1a13")`;
+      }
+    }
+
+    // Initiate login process
+    async function initiateLogin() {
+      try {
+        showStatusMessage('� Connecting to Google Drive...', 'info');
+        
+        if (!window.cloudStorage) {
+          await initializeCloudStorage();
+        }
+        
+        const authenticated = await window.cloudStorage.authenticate(true); // Force interactive login
+        
+        if (authenticated) {
+          userProfile = await window.cloudStorage.getUserProfile();
+          isAuthenticated = true;
+          updateUIForAuthenticatedUser();
+          
+          showStatusMessage('✅ Login successful! Loading your data...', 'success');
+          
+          // Load data from cloud after authentication
+          setTimeout(() => {
+            loadData();
+            renderDashboard();
+            renderOrders();
+          }, 1000);
+          
+          console.log('✅ Login successful:', userProfile.name);
+        } else {
+          showStatusMessage('❌ Login failed or cancelled', 'error');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showStatusMessage('❌ Login error: ' + error.message, 'error');
+      }
+    }
+
+    // Logout function
+    async function logout() {
+      try {
+        showStatusMessage('🚪 Logging out...', 'info');
+        
+        if (window.cloudStorage) {
+          await window.cloudStorage.logout();
+        }
+        
+        isAuthenticated = false;
+        userProfile = null;
+        updateUIForUnauthenticatedUser();
+        
+        showStatusMessage('✅ Logged out successfully', 'success');
+        
+        console.log('✅ User logged out');
+      } catch (error) {
+        console.error('Logout error:', error);
+        showStatusMessage('❌ Logout error: ' + error.message, 'error');
+      }
     }
     
     // Show login overlay
@@ -320,6 +411,8 @@ async function saveDataToCloud() {
     // Initialize app on page load
     window.addEventListener('load', async () => {
       loadData(); // Load data first
+      renderDashboard(); // Render dashboard with loaded data
+      renderOrders(); // Render orders table
       await initializeCloudStorage();
       await checkAuthStatus();
     });
@@ -1024,7 +1117,22 @@ async function saveDataToCloud() {
             <h2 class="text-[#0e1a13] text-lg font-bold leading-tight tracking-[-0.015em]">Fashion Admin Dashboard</h2>
           </div>
           <div class="flex items-center gap-4">
+            <!-- User Profile and Login Status -->
+            <div id="userProfileSection" class="flex items-center gap-3">
+              <div id="loginButton" class="hidden">
+                <button onclick="initiateLogin()" class="bg-[#51946b] text-white px-4 py-2 rounded-lg font-medium">
+                  🔑 Login with Google Drive
+                </button>
+              </div>
+              <div id="userInfo" class="hidden flex items-center gap-3">
+                <span id="userName" class="text-[#0e1a13] font-medium"></span>
+                <button onclick="logout()" class="text-[#51946b] hover:text-[#0e1a13] font-medium">
+                  🚪 Logout
+                </button>
+              </div>
+            </div>
             <div
+              id="userAvatar"
               class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
               style='background-image: url("https://ui-avatars.com/api/?name=Admin&background=e8f2ec&color=0e1a13");'
             ></div>
@@ -1544,12 +1652,21 @@ function loadDataFromLocalStorage() {
   } else {
     showStatusMessage(`✅ Sample data loaded (${orders.length} orders, ${customers.length} customers)`, 'info');
   }
+  
+  // Update UI after loading data
+  renderDashboard();
+  renderOrders();
+  
   } catch (error) {
     console.error('Load error:', error);
     showStatusMessage('❌ Error loading data: ' + error.message, 'error');
     // Fallback to empty arrays
     orders = [];
     customers = [];
+    
+    // Still render UI with empty data
+    renderDashboard();
+    renderOrders();
   }
 }
 
