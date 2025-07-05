@@ -45,6 +45,8 @@
   <script src="extension-conflict-handler.js"></script>
   <!-- Google Drive Integration -->
   <script src="google-drive-storage.js"></script>
+  <!-- Calendar Widget -->
+  <script src="calendar-widget.js"></script>
   <script>
     // Combined dashboard with login overlay
     console.log('🚀 Loading Fashion Dashboard with Login Integration');
@@ -98,12 +100,6 @@
             hideLoginOverlay();
             console.log('✅ User authenticated:', userProfile?.name || userProfile?.email || 'Unknown user');
             console.log('📋 Full user profile:', userProfile);
-            
-            // Automatically load data from cloud after authentication
-            setTimeout(() => {
-              loadData();
-            }, 1000);
-            
             return true;
           }
         }
@@ -323,25 +319,9 @@ async function saveDataToCloud() {
 
     // Initialize app on page load
     window.addEventListener('load', async () => {
-      try {
-        // Initialize cloud storage first
-        await initializeCloudStorage();
-        
-        // Check authentication status
-        const authenticated = await checkAuthStatus();
-        
-        // Load data - if authenticated, loadData will automatically try cloud first
-        if (!authenticated) {
-          // If not authenticated, load local data immediately
-          loadData();
-        }
-        // If authenticated, checkAuthStatus already triggered loadData()
-        
-      } catch (error) {
-        console.error('App initialization error:', error);
-        // Fallback to local data loading
-        loadData();
-      }
+      loadData(); // Load data first
+      await initializeCloudStorage();
+      await checkAuthStatus();
     });
   </script>
   </script>
@@ -1097,6 +1077,12 @@ async function saveDataToCloud() {
                 <p class="text-[#10b981] text-xs font-medium">Next 7 days</p>
               </div>
             </div>
+            
+            <!-- Calendar Widget -->
+            <div class="px-4 py-3">
+              <div id="dashboardCalendar"></div>
+            </div>
+            
             <h2 class="text-[#0e1a13] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Recent Orders</h2>
             <div class="px-4 py-3">
               <div class="overflow-hidden rounded-xl border border-[#d1e6d9] bg-[#f8fbfa]">
@@ -1419,33 +1405,32 @@ function saveData() {
     showStatusMessage('❌ Error saving data: ' + error.message, 'error');
   }
 }
-async function loadData() {
-  showStatusMessage('📋 Loading data...', 'info');
+function loadData() {
+  showStatusMessage('Loading data...', 'info');
   
   try {
     // First, try to load from Google Drive if authenticated
     if (isAuthenticated && window.cloudStorage) {
-      console.log('🔄 Attempting to load data from Google Drive...');
-      const cloudLoaded = await loadDataFromCloud();
-      
-      if (!cloudLoaded) {
-        console.log('📱 No cloud data found, loading from local storage...');
+      loadDataFromCloud().then(cloudLoaded => {
+        if (!cloudLoaded) {
+          // If cloud loading failed, fall back to localStorage
+          loadDataFromLocalStorage();
+        }
+      }).catch(error => {
+        console.error('Cloud loading error:', error);
+        // Fall back to localStorage
         loadDataFromLocalStorage();
-        showStatusMessage('ℹ️ Loaded local data (no cloud data found)', 'info');
-      } else {
-        showStatusMessage(`✅ Data synced from Google Drive (${orders.length} orders, ${customers.length} customers)`, 'success');
-      }
+      });
     } else {
       // Not authenticated, load from localStorage
-      console.log('🔒 Not authenticated, loading from local storage...');
       loadDataFromLocalStorage();
-      showStatusMessage('📱 Loaded local data (not signed in to Google Drive)', 'info');
     }
   } catch (error) {
     console.error('Load error:', error);
     showStatusMessage('❌ Error loading data: ' + error.message, 'error');
-    // Fallback to local storage
-    loadDataFromLocalStorage();
+    // Fallback to empty arrays
+    orders = [];
+    customers = [];
   }
 }
 
@@ -1599,6 +1584,11 @@ function renderDashboard() {
     document.getElementById('deliveriesComingUp').textContent = upcomingDeliveries;
   }
   document.getElementById('totalCustomers').textContent = customers.length;
+  
+  // Initialize calendar widget
+  if (typeof renderCalendar === 'function') {
+    renderCalendar('dashboardCalendar');
+  }
 }
 
 // --- Orders Table Rendering ---
@@ -2793,24 +2783,52 @@ window.debugDataStatus = debugDataStatus;
     }
 
     function showCreateOrderForm(orderId = null) {
-      showPage('createOrderPage');
+      showPage('createOrder');
+      
+      // Clear any previous editing state
+      const form = document.getElementById('createOrderForm');
+      if (form) {
+        delete form.dataset.editingOrderId;
+      }
+      
       if (orderId) {
         // Pre-fill the form with existing order data for editing
         const order = orders.find(o => o.id === orderId);
         if (order) {
-          document.getElementById('customerName').value = order.customer || '';
-          document.getElementById('orderCategory').value = order.category || '';
-          document.getElementById('orderType').value = order.type || '';
-          document.getElementById('fabricName').value = order.fabricName || '';
-          document.getElementById('styleReference').value = order.styleReference || '';
-          document.getElementById('description').value = order.description || '';
-          document.getElementById('expectedDelivery').value = order.deliveryDate || '';
-          document.getElementById('orderStatus').value = order.status || 'pending';
+          // Safely populate form fields with null checks
+          const customerName = document.getElementById('customerName');
+          const orderCategory = document.getElementById('orderCategory');
+          const orderType = document.getElementById('orderType');
+          const fabricName = document.getElementById('fabricName');
+          const styleReference = document.getElementById('styleReference');
+          const description = document.getElementById('description');
+          const expectedDelivery = document.getElementById('expectedDelivery');
+          const orderStatus = document.getElementById('orderStatus');
+          
+          if (customerName) customerName.value = order.customer || '';
+          if (orderCategory) orderCategory.value = order.category || '';
+          if (orderType) orderType.value = order.type || '';
+          if (fabricName) fabricName.value = order.fabricName || '';
+          if (styleReference) styleReference.value = order.styleReference || '';
+          if (description) description.value = order.description || '';
+          if (expectedDelivery) expectedDelivery.value = order.deliveryDate || '';
+          if (orderStatus) orderStatus.value = order.status || 'pending';
           
           // Store the order ID for updating
-          const form = document.getElementById('createOrderForm');
-          form.dataset.editingOrderId = orderId;
+          if (form) {
+            form.dataset.editingOrderId = orderId;
+          }
+          
+          showStatusMessage(`📝 Editing Order #${orderId}`, 'info');
+        } else {
+          showStatusMessage('❌ Order not found', 'error');
         }
+      } else {
+        // Clear form for new order
+        if (form) {
+          form.reset();
+        }
+        showStatusMessage('📝 Creating new order...', 'info');
       }
     }
 
