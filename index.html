@@ -174,8 +174,16 @@
           hideLoginOverlay();
           console.log('✅ Login successful:', userProfile.name);
           
-          // Load data from Google Drive
-          await loadDataFromCloud();
+          // Load data from Google Drive first, then render
+          await loadDataFromCloud().then(cloudLoaded => {
+            if (!cloudLoaded) {
+              // If no cloud data, load from localStorage
+              loadDataFromLocalStorage();
+            }
+          }).catch(error => {
+            console.error('Initial cloud loading error:', error);
+            loadDataFromLocalStorage();
+          });
         }
       } catch (error) {
         console.error('Login failed:', error);
@@ -210,15 +218,66 @@
     
     // Load data from Google Drive if authenticated
     async function loadDataFromCloud() {
-      if (!window.cloudStorage || !isAuthenticated) return;
+      if (!window.cloudStorage || !isAuthenticated) return false;
       
       try {
-        // Try to load orders and customers from Google Drive
-        // This integrates with your existing loadData() function
-        console.log('📥 Loading data from Google Drive...');
-        // Implementation would go here to replace localStorage calls
+        showStatusMessage('📥 Loading data from Google Drive...', 'info');
+        
+        // List files in Google Drive to find the latest data files
+        const files = await window.cloudStorage.listFiles();
+        
+        // Find the most recent orders and customers files
+        const orderFiles = files.filter(f => f.name.includes('fashion-dashboard-orders-')).sort((a, b) => b.createdTime - a.createdTime);
+        const customerFiles = files.filter(f => f.name.includes('fashion-dashboard-customers-')).sort((a, b) => b.createdTime - a.createdTime);
+        
+        let loadedFromCloud = false;
+        
+        // Load orders from the most recent file
+        if (orderFiles.length > 0) {
+          const latestOrderFile = orderFiles[0];
+          const orderData = await window.cloudStorage.downloadFile(latestOrderFile.id, latestOrderFile.name);
+          const ordersText = await orderData.text();
+          const cloudOrders = JSON.parse(ordersText);
+          
+          // Update global orders array
+          orders = cloudOrders;
+          localStorage.setItem('orders', JSON.stringify(orders));
+          loadedFromCloud = true;
+          console.log(`� Loaded ${orders.length} orders from cloud:`, latestOrderFile.name);
+        }
+        
+        // Load customers from the most recent file
+        if (customerFiles.length > 0) {
+          const latestCustomerFile = customerFiles[0];
+          const customerData = await window.cloudStorage.downloadFile(latestCustomerFile.id, latestCustomerFile.name);
+          const customersText = await customerData.text();
+          const cloudCustomers = JSON.parse(customersText);
+          
+          // Update global customers array
+          customers = cloudCustomers;
+          localStorage.setItem('customers', JSON.stringify(customers));
+          loadedFromCloud = true;
+          console.log(`👥 Loaded ${customers.length} customers from cloud:`, latestCustomerFile.name);
+        }
+        
+        if (loadedFromCloud) {
+          showStatusMessage(`✅ Data loaded from Google Drive (${orders.length} orders, ${customers.length} customers)`, 'success');
+          
+          // Update the dashboard with the loaded data
+          renderDashboard();
+          renderOrders();
+          renderCustomers();
+          
+          return true;
+        } else {
+          showStatusMessage('ℹ️ No data files found in Google Drive, using local data', 'info');
+          return false;
+        }
+        
       } catch (error) {
         console.error('Failed to load data from cloud:', error);
+        showStatusMessage('⚠️ Could not load from Google Drive, using local data: ' + error.message, 'error');
+        return false;
       }
     }
     
@@ -226,11 +285,11 @@
 async function saveDataToCloud() {
   if (!window.cloudStorage || !isAuthenticated) {
     console.log('🔒 Not authenticated, skipping cloud save');
-    return;
+    return false;
   }
   
   try {
-    showStatusMessage('Syncing to Google Drive...', 'info');
+    showStatusMessage('☁️ Syncing to Google Drive...', 'info');
     
     // Create data backup files for Google Drive
     const ordersData = JSON.stringify(orders, null, 2);
@@ -246,11 +305,13 @@ async function saveDataToCloud() {
     await window.cloudStorage.uploadFile(ordersBlob, `fashion-dashboard-orders-${timestamp}.json`);
     await window.cloudStorage.uploadFile(customersBlob, `fashion-dashboard-customers-${timestamp}.json`);
     
-    console.log('☁️ Data backed up to Google Drive');
+    console.log('☁️ Data synced to Google Drive successfully');
     showStatusMessage('✅ Data synced to Google Drive successfully', 'success');
+    return true;
   } catch (error) {
     console.error('Failed to save data to cloud:', error);
-    showStatusMessage('❌ Failed to sync to Google Drive: ' + error.message, 'error');
+    showStatusMessage('⚠️ Failed to sync to Google Drive: ' + error.message, 'error');
+    return false;
   }
 }
 
@@ -1307,20 +1368,30 @@ async function saveDataToCloud() {
     // --- Data Models with Persistence ---
 function saveData() {
   // Show saving indicator
-  showStatusMessage('Saving data...', 'info');
+  showStatusMessage('💾 Saving data...', 'info');
   
   try {
-    // Always save to localStorage first
+    // Always save to localStorage first for immediate access
     localStorage.setItem('orders', JSON.stringify(orders));
     localStorage.setItem('customers', JSON.stringify(customers));
     
+    console.log('📁 Data saved locally:', { orders: orders.length, customers: customers.length });
+    
     // Also save to Google Drive if authenticated
     if (isAuthenticated && window.cloudStorage) {
-      saveDataToCloud();
+      saveDataToCloud().then(cloudSaved => {
+        if (cloudSaved) {
+          showStatusMessage(`✅ Data saved successfully - Local & Cloud (${orders.length} orders, ${customers.length} customers)`, 'success');
+        } else {
+          showStatusMessage(`✅ Data saved locally (${orders.length} orders, ${customers.length} customers)`, 'success');
+        }
+      }).catch(error => {
+        console.error('Cloud save error:', error);
+        showStatusMessage(`✅ Data saved locally (${orders.length} orders, ${customers.length} customers)`, 'success');
+      });
+    } else {
+      showStatusMessage(`✅ Data saved locally (${orders.length} orders, ${customers.length} customers)`, 'success');
     }
-    
-    console.log('📁 Data saved:', { orders: orders.length, customers: customers.length });
-    showStatusMessage(`✅ Data saved successfully (${orders.length} orders, ${customers.length} customers)`, 'success');
   } catch (error) {
     console.error('Save error:', error);
     showStatusMessage('❌ Error saving data: ' + error.message, 'error');
@@ -1329,6 +1400,33 @@ function saveData() {
 function loadData() {
   showStatusMessage('Loading data...', 'info');
   
+  try {
+    // First, try to load from Google Drive if authenticated
+    if (isAuthenticated && window.cloudStorage) {
+      loadDataFromCloud().then(cloudLoaded => {
+        if (!cloudLoaded) {
+          // If cloud loading failed, fall back to localStorage
+          loadDataFromLocalStorage();
+        }
+      }).catch(error => {
+        console.error('Cloud loading error:', error);
+        // Fall back to localStorage
+        loadDataFromLocalStorage();
+      });
+    } else {
+      // Not authenticated, load from localStorage
+      loadDataFromLocalStorage();
+    }
+  } catch (error) {
+    console.error('Load error:', error);
+    showStatusMessage('❌ Error loading data: ' + error.message, 'error');
+    // Fallback to empty arrays
+    orders = [];
+    customers = [];
+  }
+}
+
+function loadDataFromLocalStorage() {
   try {
     const o = localStorage.getItem('orders');
     const c = localStorage.getItem('customers');
@@ -1438,13 +1536,13 @@ function loadData() {
   } else {
     showStatusMessage(`✅ Sample data loaded (${orders.length} orders, ${customers.length} customers)`, 'info');
   }
-} catch (error) {
-  console.error('Load error:', error);
-  showStatusMessage('❌ Error loading data: ' + error.message, 'error');
-  // Fallback to empty arrays
-  orders = [];
-  customers = [];
-}
+  } catch (error) {
+    console.error('Load error:', error);
+    showStatusMessage('❌ Error loading data: ' + error.message, 'error');
+    // Fallback to empty arrays
+    orders = [];
+    customers = [];
+  }
 }
 
 // --- Dashboard Rendering ---

@@ -297,7 +297,52 @@ class GoogleDriveStorageManager {
       return false;
     }
     return this.accessToken && Date.now() < this.tokenExpiresAt;
-  }  logout() {
+  }
+
+  async listFiles() {
+    if (!this.isReady) {
+      await this.initialize();
+    }
+    if (!this.accessToken || Date.now() >= this.tokenExpiresAt) {
+      await this.authenticate();
+    }
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const result = JSON.parse(xhr.responseText);
+          const files = result.files.map(file => ({
+            id: file.id,
+            name: file.name,
+            size: file.size,
+            createdTime: new Date(file.createdTime),
+            modifiedTime: new Date(file.modifiedTime),
+            mimeType: file.mimeType,
+            url: `https://drive.google.com/file/d/${file.id}/view`
+          }));
+          resolve(files);
+        } else {
+          let errorMsg = 'Failed to list files from Google Drive';
+          try {
+            const errorObj = JSON.parse(xhr.responseText);
+            if (errorObj.error && errorObj.error.message) {
+              errorMsg += `: ${errorObj.error.message}`;
+            }
+          } catch (e) {
+            errorMsg += `: ${xhr.responseText}`;
+          }
+          reject(new Error(errorMsg));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Network error while listing files'));
+      xhr.open('GET', 'https://www.googleapis.com/drive/v3/files?q=name contains "fashion-dashboard"&orderBy=createdTime desc&fields=files(id,name,size,createdTime,modifiedTime,mimeType)');
+      xhr.setRequestHeader('Authorization', `Bearer ${this.accessToken}`);
+      xhr.send();
+    });
+  }
+
+  logout() {
     const token = this.accessToken;
     this.accessToken = null;
     this.tokenExpiresAt = 0;
