@@ -98,6 +98,12 @@
             hideLoginOverlay();
             console.log('✅ User authenticated:', userProfile?.name || userProfile?.email || 'Unknown user');
             console.log('📋 Full user profile:', userProfile);
+            
+            // Automatically load data from cloud after authentication
+            setTimeout(() => {
+              loadData();
+            }, 1000);
+            
             return true;
           }
         }
@@ -317,9 +323,25 @@ async function saveDataToCloud() {
 
     // Initialize app on page load
     window.addEventListener('load', async () => {
-      loadData(); // Load data first
-      await initializeCloudStorage();
-      await checkAuthStatus();
+      try {
+        // Initialize cloud storage first
+        await initializeCloudStorage();
+        
+        // Check authentication status
+        const authenticated = await checkAuthStatus();
+        
+        // Load data - if authenticated, loadData will automatically try cloud first
+        if (!authenticated) {
+          // If not authenticated, load local data immediately
+          loadData();
+        }
+        // If authenticated, checkAuthStatus already triggered loadData()
+        
+      } catch (error) {
+        console.error('App initialization error:', error);
+        // Fallback to local data loading
+        loadData();
+      }
     });
   </script>
   </script>
@@ -1397,32 +1419,33 @@ function saveData() {
     showStatusMessage('❌ Error saving data: ' + error.message, 'error');
   }
 }
-function loadData() {
-  showStatusMessage('Loading data...', 'info');
+async function loadData() {
+  showStatusMessage('📋 Loading data...', 'info');
   
   try {
     // First, try to load from Google Drive if authenticated
     if (isAuthenticated && window.cloudStorage) {
-      loadDataFromCloud().then(cloudLoaded => {
-        if (!cloudLoaded) {
-          // If cloud loading failed, fall back to localStorage
-          loadDataFromLocalStorage();
-        }
-      }).catch(error => {
-        console.error('Cloud loading error:', error);
-        // Fall back to localStorage
+      console.log('🔄 Attempting to load data from Google Drive...');
+      const cloudLoaded = await loadDataFromCloud();
+      
+      if (!cloudLoaded) {
+        console.log('📱 No cloud data found, loading from local storage...');
         loadDataFromLocalStorage();
-      });
+        showStatusMessage('ℹ️ Loaded local data (no cloud data found)', 'info');
+      } else {
+        showStatusMessage(`✅ Data synced from Google Drive (${orders.length} orders, ${customers.length} customers)`, 'success');
+      }
     } else {
       // Not authenticated, load from localStorage
+      console.log('🔒 Not authenticated, loading from local storage...');
       loadDataFromLocalStorage();
+      showStatusMessage('📱 Loaded local data (not signed in to Google Drive)', 'info');
     }
   } catch (error) {
     console.error('Load error:', error);
     showStatusMessage('❌ Error loading data: ' + error.message, 'error');
-    // Fallback to empty arrays
-    orders = [];
-    customers = [];
+    // Fallback to local storage
+    loadDataFromLocalStorage();
   }
 }
 
